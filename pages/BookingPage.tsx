@@ -15,8 +15,14 @@ const BookingPage: React.FC = () => {
     const guestsParam = searchParams.get('guests') || '1 adult';
 
     // Parse dates or fallback to mock
-    const checkInDate = checkInParam ? new Date(checkInParam) : new Date('2026-02-06');
-    const checkOutDate = checkOutParam ? new Date(checkOutParam) : new Date('2026-02-08');
+    // Parse dates (YYYY-MM-DD) as local time to avoid timezone shifts
+    const parseLocalDate = (dateStr: string) => {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    const checkInDate = checkInParam ? parseLocalDate(checkInParam) : new Date(2026, 1, 6); // Feb 6, 2026
+    const checkOutDate = checkOutParam ? parseLocalDate(checkOutParam) : new Date(2026, 1, 8); // Feb 8, 2026
 
     // Calculate nights
     const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
