@@ -25,16 +25,9 @@ const HomePage: React.FC = () => {
             {guests > 0 && (
                 <div className="container mx-auto px-4 md:px-8 mt-8 mb-[-40px]">
                     <div className="flex items-center justify-between bg-neutral-50 p-4 rounded-lg border border-neutral-100">
-                        <div>
-                            <p className="text-sm text-neutral-600">
-                                Showing rooms for <strong>{guests} guests</strong>
-                            </p>
-                            <p className="text-xs text-red-600 mt-1 font-mono">
-                                [DEBUG] TotalRooms: {ROOMS_DATA.length} |
-                                GuestsParam: {guests} ({typeof guests}) |
-                                Room0Guests: {ROOMS_DATA[0]?.guests} ({typeof ROOMS_DATA[0]?.guests})
-                            </p>
-                        </div>
+                        <p className="text-sm text-neutral-600">
+                            Showing rooms for <strong>{guests} guests</strong>
+                        </p>
                         <button
                             onClick={clearFilters}
                             className="text-sm font-semibold text-amber-700 hover:text-amber-800 hover:underline bg-transparent border-none cursor-pointer"
