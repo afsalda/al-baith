@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap');
+/* Tailwind directives (compatible with CDN) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Cinzel Decorative', cursive;
+}
+
+::selection {
+  background: #FFD700;
+  /* Brighter gold */
+  color: #000;
+}
+
+@layer utilities {
+  .text-gold-glow {
+    background: linear-gradient(to bottom, #FFE135 0%, #FFD700 30%, #FDB931 70%, #D4AF37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.5));
+  }
+
+  .bg-gold-glow {
+    background: linear-gradient(135deg, #FDB931 0%, #FFD700 50%, #FDB931 100%);
+    box-shadow: 0 4px 15px rgba(253, 185, 49, 0.4);
+    transition: all 0.3s ease;
+  }
+
+  .bg-gold-glow:hover {
+    background: linear-gradient(135deg, #FFD700 0%, #FFE57F 50%, #FFD700 100%);
+    box-shadow: 0 6px 20px rgba(253, 185, 49, 0.6);
+    transform: translateY(-1px);
+  }
+}
+
+/* Custom CSS Variables */
+:root {
+  --radius: 0.625rem;
+
+  /* Color variables */
+  --background: 255 255 255;
+  /* white */
+  --foreground: 37 37 37;
+  /* dark gray */
+  --border: 235 235 235;
+  /* light gray */
+  --input: 235 235 235;
+  --ring: 180 180 180;
+  /* medium gray */
+
+  --primary: 52 52 52;
+  /* dark */
+  --primary-foreground: 251 251 251;
+  /* light */
+
+  --secondary: 247 247 247;
+  --secondary-foreground: 52 52 52;
+
+  --destructive: 239 68 68;
+  /* red */
+
+  --muted: 247 247 247;
+  --muted-foreground: 142 142 142;
+
+  --accent: 247 247 247;
+  --accent-foreground: 52 52 52;
+
+  --card: 255 255 255;
+  --card-foreground: 37 37 37;
+
+  --popover: 255 255 255;
+  --popover-foreground: 37 37 37;
+}
+
+/* Dark mode */
+.dark {
+  --background: 37 37 37;
+  --foreground: 251 251 251;
+  --border: 64 64 64;
+  --input: 64 64 64;
+  --ring: 142 142 142;
+
+  --primary: 235 235 235;
+  --primary-foreground: 52 52 52;
+
+  --secondary: 68 68 68;
+  --secondary-foreground: 251 251 251;
+
+  --destructive: 220 38 38;
+
+  --muted: 68 68 68;
+  --muted-foreground: 180 180 180;
+
+  --accent: 68 68 68;
+  --accent-foreground: 251 251 251;
+
+  --card: 52 52 52;
+  --card-foreground: 251 251 251;
+
+  --popover: 52 52 52;
+  --popover-foreground: 251 251 251;
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+
+  body {
+    @apply bg-white text-gray-900;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+/* Utility classes for components */
+@layer utilities {
+  .shadow-xs {
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+}
+
+/* Scrollbar utilities */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,352 @@
+import { Property, Category, Room } from './types';
+import { Wifi, Tv, Wind, Coffee } from 'lucide-react';
+import React from 'react';
+
+export const CATEGORIES: Category[] = [
+  { id: '1', label: 'Amazing pools', icon: '🏊‍♂️' },
+  { id: '2', label: 'Beachfront', icon: '🏖️' },
+  { id: '3', label: 'Cabins', icon: '🛖' },
+  { id: '4', label: 'Countryside', icon: '🌾' },
+  { id: '5', label: 'Amazing views', icon: '🏔️' },
+  { id: '6', label: 'Design', icon: '🎨' },
+  { id: '7', label: 'Islands', icon: '🏝️' },
+  { id: '8', label: 'Desert', icon: '🏜️' },
+  { id: '9', label: 'Lakefront', icon: '🌊' },
+  { id: '10', label: 'Caves', icon: '🦇' },
+  { id: '11', label: 'Tiny homes', icon: '🏠' },
+  { id: '12', label: 'Surfing', icon: '🏄' },
+];
+
+export const PROPERTIES: Property[] = [
+  {
+    id: '1',
+    title: 'Apartment in Koramangala',
+    location: 'Koramangala, Bengaluru',
+    description: 'Breathtaking views of the city in this modern luxury apartment.',
+    price: 3250,
+    rating: 4.93,
+    image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800',
+    category: 'Design',
+    distance: '2 nights',
+    dates: 'Available now',
+    isGuestFavorite: true
+  },
+  {
+    id: '2',
+    title: 'Tiny home in Indiranagar',
+    location: 'Indiranagar, Bengaluru',
+    description: 'A perfect city getaway with modern amenities.',
+    price: 2600,
+    rating: 4.85,
+    image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800',
+    category: 'Tiny homes',
+    distance: '3 nights',
+    dates: 'Nov 10 – 15',
+    isGuestFavorite: true
+  },
+  {
+    id: '3',
+    title: 'Room in BTM Layout',
+    location: 'BTM Layout, Bengaluru',
+    description: 'Wake up to the sound of birds in this peaceful room.',
+    price: 1940,
+    rating: 4.9,
+    image: 'https://images.unsplash.com/photo-1522770179533-24471fcdba45?auto=format&fit=crop&q=80&w=800',
+    category: 'Design',
+    distance: '2 nights',
+    dates: 'Dec 1 – 6',
+    isGuestFavorite: true
+  },
+  {
+    id: '4',
+    title: 'Studio in HSR Layout',
+    location: 'HSR Layout, Bengaluru',
+    description: 'High-tech living in the heart of HSR district.',
+    price: 4500,
+    rating: 4.75,
+    image: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&q=80&w=800',
+    category: 'Design',
+    distance: '5 nights',
+    dates: 'Oct 15 – 20'
+  },
+  {
+    id: '5',
+    title: 'Historic Kerala Villa',
+    location: 'Thiruvananthapuram, Kerala',
+    description: 'Renovated heritage home with traditional architecture.',
+    price: 5200,
+    rating: 4.99,
+    image: 'https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&q=80&w=800',
+    category: 'Countryside',
+    distance: '4 nights',
+    dates: 'Sep 28 – Oct 3',
+    isGuestFavorite: true
+  },
+  {
+    id: '6',
+    title: 'Backwater Retreat',
+    location: 'Alappuzha, Kerala',
+    description: 'Stay right on the backwaters in this luxury houseboat-inspired villa.',
+    price: 6100,
+    rating: 4.89,
+    image: 'https://images.unsplash.com/photo-1583037189850-1921ae7c6c22?auto=format&fit=crop&q=80&w=800',
+    category: 'Beachfront',
+    distance: '2 nights',
+    dates: 'Nov 2 – 7'
+  }
+];
+
+export const EXPERIENCES: Property[] = [
+  {
+    id: 'exp-1',
+    title: 'Traditional Kathakali Show',
+    location: 'Kochi, Kerala',
+    description: 'An immersive cultural experience of traditional dance drama.',
+    price: 1500,
+    rating: 4.95,
+    image: 'https://images.unsplash.com/photo-1582234053896-7d43890f845d?auto=format&fit=crop&q=80&w=800',
+    category: 'Culture',
+    distance: 'per person',
+    isGuestFavorite: true
+  },
+  {
+    id: 'exp-2',
+    title: 'Kayaking in Backwaters',
+    location: 'Alappuzha, Kerala',
+    description: 'Navigate through the serene narrow canals of backwaters.',
+    price: 2200,
+    rating: 4.88,
+    image: 'https://images.unsplash.com/photo-1544550581-5f7ceaf7f992?auto=format&fit=crop&q=80&w=800',
+    category: 'Nature',
+    distance: '3 hours'
+  },
+  {
+    id: 'exp-3',
+    title: 'Spices & Plantations Tour',
+    location: 'Munnar, Kerala',
+    description: 'Learn about pepper, cardamom, and tea plantations.',
+    price: 1800,
+    rating: 4.92,
+    image: 'https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?auto=format&fit=crop&q=80&w=800',
+    category: 'Nature',
+    distance: 'full day',
+    isGuestFavorite: true
+  },
+  {
+    id: 'exp-4',
+    title: 'Houseboat Sunset Cruise',
+    location: 'Kumarakom, Kerala',
+    description: 'Experience the magic of Kerala backwaters at sunset.',
+    price: 3500,
+    rating: 4.97,
+    image: 'https://images.unsplash.com/photo-1559827260-dc66d52bef19?auto=format&fit=crop&q=80&w=800',
+    category: 'Nature',
+    distance: '4 hours',
+    isGuestFavorite: true
+  },
+  {
+    id: 'exp-5',
+    title: 'Cooking Class: Kerala Sadya',
+    location: 'Thiruvananthapuram, Kerala',
+    description: 'Master the art of traditional Kerala feast preparation.',
+    price: 2500,
+    rating: 4.89,
+    image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=800',
+    category: 'Culinary',
+    distance: '3 hours'
+  },
+  {
+    id: 'exp-6',
+    title: 'Yoga & Meditation Retreat',
+    location: 'Varkala, Kerala',
+    description: 'Rejuvenate your mind and body with ancient practices.',
+    price: 2000,
+    rating: 4.93,
+    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=800',
+    category: 'Wellness',
+    distance: '2 hours',
+    isGuestFavorite: true
+  },
+  {
+    id: 'exp-7',
+    title: 'Theyyam Ritual Performance',
+    location: 'Kannur, Kerala',
+    description: 'Witness the ancient tribal art form come to life.',
+    price: 1200,
+    rating: 4.96,
+    image: 'https://images.unsplash.com/photo-1609619385002-f40f2bc9f93c?auto=format&fit=crop&q=80&w=800',
+    category: 'Culture',
+    distance: '2 hours',
+    comingSoon: true
+  },
+  {
+    id: 'exp-8',
+    title: 'Bamboo Rafting Adventure',
+    location: 'Periyar, Kerala',
+    description: 'Float through the wildlife sanctuary on bamboo rafts.',
+    price: 2800,
+    rating: 4.85,
+    image: 'https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&q=80&w=800',
+    category: 'Adventure',
+    distance: '5 hours'
+  },
+  {
+    id: 'exp-9',
+    title: 'Pottery Making Workshop',
+    location: 'Thrissur, Kerala',
+    description: 'Create your own terracotta masterpiece with local artisans.',
+    price: 1500,
+    rating: 4.81,
+    image: 'https://images.unsplash.com/photo-1565193566173-7a0ee3dbe261?auto=format&fit=crop&q=80&w=800',
+    category: 'Craft',
+    distance: '2 hours',
+    comingSoon: true
+  },
+  {
+    id: 'exp-10',
+    title: 'Elephant Sanctuary Visit',
+    location: 'Kodanad, Kerala',
+    description: 'Meet and interact with rescued elephants in their habitat.',
+    price: 3200,
+    rating: 4.99,
+    image: 'https://images.unsplash.com/photo-1564760055775-d63b17a55c44?auto=format&fit=crop&q=80&w=800',
+    category: 'Wildlife',
+    distance: 'half day',
+    isGuestFavorite: true
+  },
+  {
+    id: 'exp-11',
+    title: 'Seafood Cooking Masterclass',
+    location: 'Fort Kochi, Kerala',
+    description: 'Learn to cook fresh catch from local fishermen.',
+    price: 2700,
+    rating: 4.90,
+    image: 'https://images.unsplash.com/photo-1559847844-5315695dadae?auto=format&fit=crop&q=80&w=800',
+    category: 'Culinary',
+    distance: '4 hours'
+  },
+  {
+    id: 'exp-12',
+    title: 'Waterfall Trekking',
+    location: 'Athirappilly, Kerala',
+    description: 'Trek through lush forests to majestic waterfalls.',
+    price: 1900,
+    rating: 4.87,
+    image: 'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?auto=format&fit=crop&q=80&w=800',
+    category: 'Adventure',
+    distance: '6 hours',
+    comingSoon: true
+  }
+];
+
+export const SERVICES: Property[] = [
+  {
+    id: 'ser-1',
+    title: 'Private Chef Service',
+    location: 'At your villa',
+    description: 'Traditional Kerala Sadya prepared at your doorstep.',
+    price: 4500,
+    rating: 5.0,
+    image: 'https://images.unsplash.com/photo-1556910103-1c02745aae4d?auto=format&fit=crop&q=80&w=800',
+    category: 'Dining',
+    distance: 'per meal'
+  },
+  {
+    id: 'ser-2',
+    title: 'Ayurvedic Wellness Session',
+    location: 'At your home',
+    description: 'Relaxing full body massage with herbal oils.',
+    price: 3500,
+    rating: 4.97,
+    image: 'https://images.unsplash.com/photo-1544161515-4af6b1d8c159?auto=format&fit=crop&q=80&w=800',
+    category: 'Wellness',
+    distance: '90 min',
+    isGuestFavorite: true
+  }
+];
+
+export const ROOMS_DATA: Room[] = [
+  {
+    id: "suite-room",
+    imageUrl: "/images/suite-room.png",
+    imageAlt: "Suite room with modern amenities",
+    roomType: "Suite Room",
+    roomName: "Suite Room",
+    location: "Kochi, Kerala, India",
+    rating: 4.9,
+    reviewCount: 1092,
+    price: 2500,
+    currency: "₹",
+    features: [
+      { icon: <Wifi className="h-4 w-4" />, label: "WiFi" },
+      { icon: <Tv className="h-4 w-4" />, label: "TV" },
+      { icon: <Wind className="h-4 w-4" />, label: "AC" },
+      { icon: <Coffee className="h-4 w-4" />, label: "Coffee" },
+    ],
+    available: true,
+    beds: "King Bed",
+    size: "45 m²",
+  },
+  {
+    id: "deluxe-room",
+    imageUrl: "/images/deluxe-main.jpg",
+    imageAlt: "Executive suite with city view",
+    roomType: "Deluxe",
+    roomName: "Deluxe Room",
+    location: "Kochi, Kerala, India",
+    rating: 4.8,
+    reviewCount: 856,
+    price: 1800,
+    currency: "₹",
+    features: [
+      { icon: <Wifi className="h-4 w-4" />, label: "WiFi" },
+      { icon: <Tv className="h-4 w-4" />, label: "TV" },
+      { icon: <Wind className="h-4 w-4" />, label: "AC" },
+      { icon: <Coffee className="h-4 w-4" />, label: "Coffee" },
+    ],
+    available: true,
+    beds: "2 Queen Beds",
+    size: "60 m²",
+  },
+  {
+    id: "standard-room",
+    imageUrl: "/images/standard-1.jpg",
+    imageAlt: "Standard room with garden view",
+    roomType: "Standard",
+    roomName: "Standard Room",
+    location: "Kochi, Kerala, India",
+    rating: 4.7,
+    reviewCount: 634,
+    price: 1500,
+    currency: "₹",
+    features: [
+      { icon: <Wifi className="h-4 w-4" />, label: "WiFi" },
+      { icon: <Tv className="h-4 w-4" />, label: "TV" },
+      { icon: <Wind className="h-4 w-4" />, label: "AC" },
+    ],
+    available: true,
+    beds: "Queen Bed",
+    size: "35 m²",
+  },
+  {
+    id: "apartment",
+    imageUrl: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070&auto=format&fit=crop",
+    imageAlt: "Presidential suite with ocean view",
+    roomType: "Apartment",
+    roomName: "Apartment",
+    location: "Kochi, Kerala, India",
+    rating: 5.0,
+    reviewCount: 423,
+    price: 3000,
+    currency: "₹",
+    features: [
+      { icon: <Wifi className="h-4 w-4" />, label: "WiFi" },
+      { icon: <Tv className="h-4 w-4" />, label: "TV" },
+      { icon: <Wind className="h-4 w-4" />, label: "AC" },
+      { icon: <Coffee className="h-4 w-4" />, label: "Coffee" },
+    ],
+    available: false,
+    beds: "King Bed + Sofa",
+    size: "80 m²",
+  },
+];
