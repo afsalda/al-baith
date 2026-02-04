@@ -60,7 +60,7 @@ const roomsData: Record<string, RoomDetails> = {
         size: '45 m²',
         description: 'A premium room offering more space and added conveniences for a comfortable extended stay. Perfect for families or guests seeking premium comfort.',
         host: {
-            name: 'Al-Baith Hospitality',
+            name: 'Al Baith Resthouse',
             image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
             yearsHosting: 3,
             superhost: true,
@@ -107,7 +107,7 @@ const roomsData: Record<string, RoomDetails> = {
         size: '120 sq.ft (11 sq.mt)',
         description: 'A spacious upgrade from the standard room with extra space to accommodate an additional bed. Ideal for small families or guests needing extra space.',
         host: {
-            name: 'Al-Baith Hospitality',
+            name: 'Al Baith Resthouse',
             image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
             yearsHosting: 3,
             superhost: true,
@@ -150,7 +150,7 @@ const roomsData: Record<string, RoomDetails> = {
         size: '35 m²',
         description: 'A simple, comfortable room ideal for short stays and solo or couple guests. Best suited for budget stays with all essential comforts.',
         host: {
-            name: 'Al-Baith Hospitality',
+            name: 'Al Baith Resthouse',
             image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
             yearsHosting: 3,
             superhost: true,
@@ -193,7 +193,7 @@ const roomsData: Record<string, RoomDetails> = {
         size: 'Varies by Type',
         description: 'Fully furnished apartments designed for families and long-term stays with complete home-style facilities. Available in 1 BHK, 2 BHK, and 3 BHK configurations. Best choice for families, groups, and long-duration stays.',
         host: {
-            name: 'Al-Baith Hospitality',
+            name: 'Al Baith Resthouse',
             image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
             yearsHosting: 3,
             superhost: true,
@@ -412,6 +412,28 @@ const RoomDetailsPage: React.FC = () => {
                                         <span>{amenity}</span>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+
+                        {/* Things to know */}
+                        <div className="py-8 border-b">
+                            <h2 className="text-2xl font-semibold mb-6">Things to know</h2>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <h3 className="font-semibold mb-2">House rules</h3>
+                                    <ul className="space-y-2 text-gray-700">
+                                        <li>Check-in: 12:00 PM</li>
+                                        <li>Checkout: 11:00 PM</li>
+                                        <li>No smoking</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold mb-2">Safety & Property</h3>
+                                    <ul className="space-y-2 text-gray-700">
+                                        <li>Security camera/recording device</li>
+                                        <li>Carbon monoxide alarm not reported</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
 
