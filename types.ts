@@ -44,4 +44,5 @@ export interface Room {
   available: boolean;
   beds: string;
   size: string;
+  guests: number;
 }
