@@ -1,5 +1,5 @@
 import { Property, Category, Room } from './types';
-import { Wifi, Tv, Wind, Coffee } from 'lucide-react';
+import { Wifi, Tv, Wind, Coffee, Zap, Bath, Flame } from 'lucide-react';
 import React from 'react';
 
 export const CATEGORIES: Category[] = [
@@ -320,9 +320,12 @@ export const ROOMS_DATA: Room[] = [
     price: 1500,
     currency: "₹",
     features: [
-      { icon: <Wifi className="h-4 w-4" />, label: "WiFi" },
+      { icon: <Wifi className="h-4 w-4" />, label: "Wi-Fi" },
       { icon: <Tv className="h-4 w-4" />, label: "TV" },
       { icon: <Wind className="h-4 w-4" />, label: "AC" },
+      { icon: <Flame className="h-4 w-4" />, label: "Heater" },
+      { icon: <Zap className="h-4 w-4" />, label: "Power Backup" },
+      { icon: <Bath className="h-4 w-4" />, label: "Attached Bathroom" },
     ],
     available: true,
     beds: "Queen Bed",

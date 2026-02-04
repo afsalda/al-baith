@@ -129,7 +129,7 @@ const roomsData: Record<string, RoomDetails> = {
     },
     'standard-room': {
         id: 'standard-room',
-        name: 'Cozy Standard Room with Garden View',
+        name: 'Standard Room',
         type: 'Standard',
         location: 'Kochi, Kerala, India',
         rating: 4.7,
@@ -148,7 +148,7 @@ const roomsData: Record<string, RoomDetails> = {
         bathrooms: 1,
         beds: 'Queen Bed',
         size: '35 m²',
-        description: 'A comfortable and bright standard room overlooking our lush gardens. Perfect for solo travelers or couples looking for a peaceful retreat.',
+        description: 'A simple, comfortable room ideal for short stays and solo or couple guests. Best suited for budget stays with all essential comforts.',
         host: {
             name: 'Al-Baith Hospitality',
             image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
@@ -158,8 +158,8 @@ const roomsData: Record<string, RoomDetails> = {
         highlights: [
             {
                 icon: <Home className="w-6 h-6" />,
-                title: 'Garden View',
-                description: 'Wake up to the sound of nature',
+                title: 'Budget Friendly',
+                description: 'All essential comforts at an affordable price',
             },
             {
                 icon: <Shield className="w-6 h-6" />,
@@ -167,7 +167,7 @@ const roomsData: Record<string, RoomDetails> = {
                 description: 'Flexible booking options',
             },
         ],
-        amenities: ['WiFi', 'TV', 'Air Conditioning', 'Toiletries', 'Clean Towels'],
+        amenities: ['Free Wi-Fi', 'Television', 'Air Conditioning', 'Heater', 'Power Backup', 'Attached Bathroom'],
         isGuestFavorite: false,
     },
     'apartment': {
