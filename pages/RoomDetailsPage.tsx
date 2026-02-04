@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Star, Heart, Share2, Wifi, Tv, Wind, Coffee, Users, Home, Calendar, Shield, Award, Clock, Droplets, Zap, Armchair, Moon, Flame, Bath, Sparkles, Utensils } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { roomsData } from '../constants';
+import { ROOMS_DATA } from '../constants';
 import CompactCalendar from '../components/CompactCalendar';
 
 interface RoomDetails {
