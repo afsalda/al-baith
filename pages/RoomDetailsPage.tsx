@@ -73,7 +73,13 @@ const RoomDetailsPage: React.FC = () => {
         }
 
         // Format for URL
-        const formatDate = (date: Date) => date.toISOString().split('T')[0];
+        // Format for URL (Local YYYY-MM-DD to avoid timezone shifts)
+        const formatDate = (date: Date) => {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        };
 
         navigate(`/booking/${id}?checkIn=${formatDate(checkInDate)}&checkOut=${formatDate(checkOutDate)}&guests=${guests}`);
     };
