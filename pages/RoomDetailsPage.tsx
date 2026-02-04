@@ -87,7 +87,7 @@ const roomsData: Record<string, RoomDetails> = {
     },
     'deluxe-room': {
         id: 'deluxe-room',
-        name: 'Deluxe Room with City View',
+        name: 'Deluxe Room',
         type: 'Deluxe',
         location: 'Kochi, Kerala, India',
         rating: 4.8,
@@ -100,12 +100,12 @@ const roomsData: Record<string, RoomDetails> = {
             '/images/deluxe-1.jpg',
             '/images/deluxe-bathroom.jpg',
         ],
-        guests: 2,
+        guests: 3,
         bedrooms: 1,
         bathrooms: 1,
         beds: '1 King Bed',
         size: '120 sq.ft (11 sq.mt)',
-        description: 'Experience luxury in our deluxe room. Spacious and elegantly designed with premium amenities including 24-hour housekeeping and modern conveniences.',
+        description: 'A spacious upgrade from the standard room with extra space to accommodate an additional bed. Ideal for small families or guests needing extra space.',
         host: {
             name: 'Al-Baith Hospitality',
             image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
@@ -115,8 +115,8 @@ const roomsData: Record<string, RoomDetails> = {
         highlights: [
             {
                 icon: <Home className="w-6 h-6" />,
-                title: 'Spacious accommodation',
-                description: '120 sq.ft of comfort',
+                title: 'Extra Space',
+                description: 'Accommodates an additional bed for a 3rd guest',
             },
             {
                 icon: <Shield className="w-6 h-6" />,
@@ -124,7 +124,7 @@ const roomsData: Record<string, RoomDetails> = {
                 description: 'Cancel anytime before check-in',
             },
         ],
-        amenities: ['24-hour Housekeeping', 'Wi-Fi', 'Air Conditioning', 'Bathroom', 'Mineral Water', 'Charging Points', 'Chair', 'Blackout Curtains', 'Kettle', 'Shaving Mirror', 'Geyser/Water Heater', 'Western Toilet Seat', 'Toiletries'],
+        amenities: ['Free Wi-Fi', 'Television', 'Air Conditioning', 'Heater', 'Power Backup', 'Attached Bathroom'],
         isGuestFavorite: true,
     },
     'standard-room': {
