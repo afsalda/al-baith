@@ -1,5 +1,5 @@
 import { Property, Category, Room } from './types';
-import { Wifi, Tv, Wind, Coffee, Zap, Bath, Flame, Utensils } from 'lucide-react';
+import { Wifi, Tv, Wind, Coffee, Zap, Bath, Flame, Utensils, Refrigerator, Sofa } from 'lucide-react';
 import React from 'react';
 
 export const CATEGORIES: Category[] = [
@@ -285,6 +285,7 @@ export const ROOMS_DATA: Room[] = [
       { icon: <Zap className="h-4 w-4" />, label: "Power Backup" },
       { icon: <Bath className="h-4 w-4" />, label: "Attached Bathroom" },
       { icon: <Utensils className="h-4 w-4" />, label: "Mini Kitchen" },
+      { icon: <Refrigerator className="h-4 w-4" />, label: "Mini Fridge" },
     ],
     available: true,
     beds: "King Bed",
@@ -310,8 +311,8 @@ export const ROOMS_DATA: Room[] = [
       { icon: <Bath className="h-4 w-4" />, label: "Attached Bathroom" },
     ],
     available: true,
-    beds: "2 Queen Beds",
-    size: "60 m²",
+    beds: "1 King Bed",
+    size: "120 sq.ft (11 sq.mt)",
   },
   {
     id: "standard-room",
@@ -355,9 +356,10 @@ export const ROOMS_DATA: Room[] = [
       { icon: <Zap className="h-4 w-4" />, label: "Power Backup" },
       { icon: <Bath className="h-4 w-4" />, label: "Attached Bathrooms" },
       { icon: <Utensils className="h-4 w-4" />, label: "Full Kitchen" },
+      { icon: <Sofa className="h-4 w-4" />, label: "Living Area" },
     ],
     available: false,
-    beds: "King Bed + Sofa",
+    beds: "Multiple BHK Options",
     size: "80 m²",
   },
 ];
