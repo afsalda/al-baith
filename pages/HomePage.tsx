@@ -26,9 +26,14 @@ const HomePage: React.FC = () => {
             {guests > 0 && (
                 <div className="container mx-auto px-4 md:px-8 mt-8 mb-[-40px]">
                     <div className="flex items-center justify-between bg-neutral-50 p-4 rounded-lg border border-neutral-100">
-                        <p className="text-sm text-neutral-600">
-                            Showing rooms for <strong>{guests} guests</strong>
-                        </p>
+                        <div>
+                            <p className="text-sm text-neutral-600">
+                                Found <strong>{filteredRooms.length} rooms</strong> for <strong>{guests} guests</strong>
+                            </p>
+                            <p className="text-xs text-red-500 mt-1">
+                                (Debug: Total {ROOMS_DATA.length}, 1st Room Guests: {String(ROOMS_DATA[0]?.guests)})
+                            </p>
+                        </div>
                         <a
                             href="/"
                             className="text-sm font-semibold text-amber-700 hover:text-amber-800 hover:underline"
