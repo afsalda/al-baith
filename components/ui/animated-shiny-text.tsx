@@ -26,16 +26,20 @@ const AnimatedText = React.forwardRef<HTMLDivElement, AnimatedTextProps>(
     ) => {
         const [isHovered, setIsHovered] = React.useState(false);
 
+        const shimmerTime = 3; // Fast shimmer pass duration
+        const cycleTime = Math.max(gradientAnimationDuration, shimmerTime);
+
         const textVariants: Variants = {
             initial: {
                 backgroundPosition: "0 0",
             },
             animate: {
-                backgroundPosition: "200% 0", // Smoother loop
+                backgroundPosition: "200% 0",
                 transition: {
-                    duration: gradientAnimationDuration,
-                    ease: "linear",
+                    duration: shimmerTime,
+                    ease: "easeInOut",
                     repeat: Infinity,
+                    repeatDelay: cycleTime - shimmerTime,
                 },
             },
         };
