@@ -237,6 +237,16 @@ const RoomDetailsPage: React.FC = () => {
     const navigate = useNavigate();
     const [saved, setSaved] = useState(false);
     const [showAllPhotos, setShowAllPhotos] = useState(false);
+    const [checkInDate, setCheckInDate] = useState('');
+    const [checkOutDate, setCheckOutDate] = useState('');
+
+    const handleReserve = () => {
+        if (!checkInDate || !checkOutDate) {
+            alert('Please select both check-in and check-out dates to continue.');
+            return;
+        }
+        navigate(`/booking/${id}`);
+    };
 
     const room = roomsData[id || 'suite-room'];
 
@@ -456,6 +466,8 @@ const RoomDetailsPage: React.FC = () => {
                                             type="date"
                                             className="text-sm w-full outline-none cursor-pointer"
                                             min={new Date().toISOString().split('T')[0]}
+                                            value={checkInDate}
+                                            onChange={(e) => setCheckInDate(e.target.value)}
                                         />
                                     </div>
                                     <div className="p-3">
@@ -463,7 +475,9 @@ const RoomDetailsPage: React.FC = () => {
                                         <input
                                             type="date"
                                             className="text-sm w-full outline-none cursor-pointer"
-                                            min={new Date().toISOString().split('T')[0]}
+                                            min={checkInDate || new Date().toISOString().split('T')[0]}
+                                            value={checkOutDate}
+                                            onChange={(e) => setCheckOutDate(e.target.value)}
                                         />
                                     </div>
                                 </div>
@@ -481,7 +495,7 @@ const RoomDetailsPage: React.FC = () => {
 
                                 {/* Reserve Button */}
                                 <button
-                                    onClick={() => navigate(`/booking/${id}`)}
+                                    onClick={handleReserve}
                                     className="w-full bg-gold-glow text-amber-950 py-3 rounded-lg font-semibold hover:opacity-90 transition mb-4 shadow-lg border-none"
                                 >
                                     Reserve
@@ -518,7 +532,7 @@ const RoomDetailsPage: React.FC = () => {
                     </div>
                 </div>
                 <button
-                    onClick={() => navigate(`/booking/${id}`)}
+                    onClick={handleReserve}
                     className="bg-gold-glow text-amber-950 px-8 py-3 rounded-lg font-bold shadow-md"
                 >
                     Reserve
