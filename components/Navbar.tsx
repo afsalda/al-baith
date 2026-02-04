@@ -3,17 +3,21 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { AnimatedText } from './ui/animated-shiny-text';
-import CalendarModal from './CalendarModal';
+import CompactCalendar from './CompactCalendar';
 import GuestModal from './GuestModal';
 import { ViewMode } from '../types';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showCalendar, setShowCalendar] = useState(false);
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [activeSearchSection, setActiveSearchSection] = useState<'when' | 'who' | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
+  // Date State for Range
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [endDate, setEndDate] = useState<Date | null>(null);
 
   // Determine current view based on route
   const currentView: ViewMode = location.pathname === '/experiences' ? 'experiences' :
@@ -27,9 +31,10 @@ const Navbar: React.FC = () => {
     pets: 0
   });
 
-  // Handler for date selection
-  const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
+  // Handler for range selection
+  const handleRangeSelect = (start: Date | null, end: Date | null) => {
+    setStartDate(start);
+    setEndDate(end);
   };
 
   // Sync active section with dropdown states
@@ -46,20 +51,40 @@ const Navbar: React.FC = () => {
     setIsSearching(true);
 
     const totalGuests = guestCounts.adults + guestCounts.children;
-    const summary = `Searching for:
-- Mode: ${currentView}
-- Dates: Selected in calendar
-- Guests: ${totalGuests} (${guestCounts.adults} adults, ${guestCounts.children} children)
-- Infants: ${guestCounts.infants}
-- Pets: ${guestCounts.pets}`;
 
-    // Simulate search delay
+    // Simulate search delay then navigate with params
     setTimeout(() => {
-      alert(summary);
       setIsSearching(false);
       setShowCalendar(false);
       setShowGuestModal(false);
+
+      // Navigate to Home with search params (or a search results page if one existed)
+      // Since we don't have a search results page, we'll just reload Home with params 
+      // which assumes Home might eventually filter based on them.
+      // For now, let's just create the URL - user asked to "make it workable". 
+      // Navigating with params is "workable". 
+
+      const params = new URLSearchParams();
+      if (startDate) params.set('checkIn', startDate.toISOString().split('T')[0]); // Use YYYY-MM-DD
+      if (endDate) params.set('checkOut', endDate.toISOString().split('T')[0]);
+      if (totalGuests > 0) params.set('guests', totalGuests.toString());
+
+      // If we selected a specific room implicitly? No.
+      // Just go to home (or stay) with params.
+      navigate(`/?${params.toString()}`);
+
     }, 600);
+  };
+
+  // Format date range for display
+  const getDateDisplay = () => {
+    if (startDate && endDate) {
+      return `${startDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} - ${endDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`;
+    }
+    if (startDate) {
+      return `${startDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} - Add checkout`;
+    }
+    return 'Add dates';
   };
 
   return (
@@ -85,7 +110,7 @@ const Navbar: React.FC = () => {
                 className="py-0"
                 style={{ fontFamily: '"Cinzel Decorative", cursive' }}
                 gradientColors="linear-gradient(90deg, #B8860B, #FFD700, #FFF, #FFD700, #B8860B)"
-                gradientAnimationDuration={10}
+                gradientAnimationDuration={15}
               />
             </Link>
           </div>
@@ -194,10 +219,7 @@ const Navbar: React.FC = () => {
               >
                 <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-wider">When</span>
                 <span className="text-xs md:text-sm text-neutral-500 truncate">
-                  {selectedDate
-                    ? selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
-                    : 'Add dates'
-                  }
+                  {getDateDisplay()}
                 </span>
               </div>
 
@@ -239,7 +261,16 @@ const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {showCalendar && <CalendarModal currentView={currentView} onDateSelect={handleDateSelect} onClose={() => setShowCalendar(false)} />}
+            {showCalendar && (
+              <CompactCalendar
+                mode="range"
+                startDate={startDate}
+                endDate={endDate}
+                onRangeSelect={handleRangeSelect}
+                onClose={() => setShowCalendar(false)}
+                minDate={new Date()}
+              />
+            )}
             {showGuestModal && (
               <GuestModal
                 counts={guestCounts}
