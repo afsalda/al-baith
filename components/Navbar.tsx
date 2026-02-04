@@ -230,6 +230,7 @@ const Navbar: React.FC = () => {
                   </span>
                 </div>
                 <button
+                  type="button"
                   onClick={handleSearch}
                   disabled={isSearching}
                   className="bg-gold-glow text-amber-950 flex items-center gap-1 md:gap-2 px-2.5 md:px-6 py-2 md:py-3 rounded-full hover:shadow-lg transition active:scale-95 ml-1 md:ml-4 disabled:opacity-70 disabled:cursor-wait relative flex-shrink-0"
