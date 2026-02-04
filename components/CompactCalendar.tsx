@@ -12,11 +12,21 @@ interface CompactCalendarProps {
     onClose: () => void;
 }
 
-const CompactCalendar: React.FC<CompactCalendarProps> = ({ selectedDate, onDateSelect, minDate, onClose }) => {
+const CompactCalendar: React.FC<CompactCalendarProps> = ({
+    mode = 'single',
+    selectedDate,
+    startDate,
+    endDate,
+    onDateSelect,
+    onRangeSelect,
+    minDate,
+    onClose
+}) => {
     const today = new Date();
     // Start with selected date's month, or today's month
     const [currentMonth, setCurrentMonth] = useState(() => {
-        if (selectedDate) return new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+        if (mode === 'single' && selectedDate) return new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+        if (mode === 'range' && startDate) return new Date(startDate.getFullYear(), startDate.getMonth(), 1);
         return new Date(today.getFullYear(), today.getMonth(), 1);
     });
 
@@ -29,20 +39,28 @@ const CompactCalendar: React.FC<CompactCalendarProps> = ({ selectedDate, onDateS
     };
 
     const handleDateClick = (date: Date) => {
-        if (minDate) {
-            // Reset times to compare dates only
-            const dateStr = date.toDateString();
-            const minDateStr = minDate.toDateString();
-            // If date is before minDate (and not equal), disable
-            // Actually, simple comparison:
-            if (date.setHours(0, 0, 0, 0) < minDate.setHours(0, 0, 0, 0)) return;
-        }
-
-        // Prevent selecting past dates globally if no minDate provided (standard sanity check)
+        // Validation (Past dates)
         if (date.setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) return;
+        if (minDate && date.setHours(0, 0, 0, 0) < minDate.setHours(0, 0, 0, 0)) return;
 
-        onDateSelect(date);
-        onClose();
+        if (mode === 'single' && onDateSelect) {
+            onDateSelect(date);
+            onClose();
+        } else if (mode === 'range' && onRangeSelect) {
+            if (!startDate || (startDate && endDate)) {
+                // Start new range
+                onRangeSelect(date, null);
+            } else if (startDate && !endDate) {
+                // Complete range
+                if (date < startDate) {
+                    onRangeSelect(date, startDate); // Swap if clicked before start
+                    onClose();
+                } else {
+                    onRangeSelect(startDate, date);
+                    onClose();
+                }
+            }
+        }
     };
 
     const { firstDay, daysInMonth } = getDaysInMonth(currentMonth);
@@ -58,24 +76,48 @@ const CompactCalendar: React.FC<CompactCalendarProps> = ({ selectedDate, onDateS
     // Days
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-        const isSelected = selectedDate?.toDateString() === date.toDateString();
-        const isToday = today.toDateString() === date.toDateString();
+        const dateStr = date.toDateString();
+        const isToday = today.toDateString() === dateStr;
+
+        let isSelected = false;
+        let isInRange = false;
+
+        if (mode === 'single') {
+            isSelected = selectedDate?.toDateString() === dateStr;
+        } else {
+            if (startDate?.toDateString() === dateStr) isSelected = true;
+            if (endDate?.toDateString() === dateStr) isSelected = true;
+            if (startDate && endDate && date > startDate && date < endDate) isInRange = true;
+        }
 
         let isDisabled = false;
         if (date.setHours(0, 0, 0, 0) < new Date().setHours(0, 0, 0, 0)) isDisabled = true;
         if (minDate && date.setHours(0, 0, 0, 0) < minDate.setHours(0, 0, 0, 0)) isDisabled = true;
+
+        // Styling classes
+        let bgClass = '';
+        let textClass = 'text-black';
+
+        if (isDisabled) {
+            textClass = 'text-gray-300 cursor-not-allowed';
+        } else if (isSelected) {
+            bgClass = 'bg-[#C79D27] text-white';
+            textClass = 'text-white';
+        } else if (isInRange) {
+            bgClass = 'bg-[#F9F1D8]'; // Lighter gold/yellow for range
+            textClass = 'text-black';
+        } else if (isToday) {
+            bgClass = 'border border-[#C79D27]';
+        } else {
+            bgClass = 'hover:bg-neutral-100';
+        }
 
         calendarDays.push(
             <button
                 key={day}
                 onClick={() => !isDisabled && handleDateClick(date)}
                 disabled={isDisabled}
-                className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium transition-all
-                    ${isDisabled ? 'text-gray-300 cursor-not-allowed' :
-                        isSelected ? 'bg-[#C79D27] text-white' :
-                            isToday ? 'border border-[#C79D27] text-black' :
-                                'hover:bg-neutral-100 text-black'
-                    }`}
+                className={`h-9 w-9 rounded-full flex items-center justify-center text-sm font-medium transition-all ${bgClass} ${textClass}`}
             >
                 {day}
             </button>
