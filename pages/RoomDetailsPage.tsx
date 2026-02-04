@@ -172,7 +172,7 @@ const roomsData: Record<string, RoomDetails> = {
     },
     'apartment': {
         id: 'apartment',
-        name: 'Luxury Apartment with Ocean View',
+        name: 'Apartment',
         type: 'Apartment',
         location: 'Kochi, Kerala, India',
         rating: 5.0,
@@ -186,12 +186,12 @@ const roomsData: Record<string, RoomDetails> = {
             'https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1974',
             'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925',
         ],
-        guests: 4,
-        bedrooms: 2,
-        bathrooms: 2,
-        beds: 'King Bed + Sofa',
-        size: '80 m²',
-        description: 'Our premium apartment offers the ultimate luxury experience with sweeping ocean views, a full kitchen, and spacious living area.',
+        guests: 6, // Base for higher BHKs, description clarifies variations
+        bedrooms: 3,
+        bathrooms: 3,
+        beds: 'Multiple BHK Options',
+        size: 'Varies by Type',
+        description: 'Fully furnished apartments designed for families and long-term stays with complete home-style facilities. Available in 1 BHK, 2 BHK, and 3 BHK configurations. Best choice for families, groups, and long-duration stays.',
         host: {
             name: 'Al-Baith Hospitality',
             image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
@@ -201,16 +201,16 @@ const roomsData: Record<string, RoomDetails> = {
         highlights: [
             {
                 icon: <Award className="w-6 h-6" />,
-                title: 'Guest favourite',
-                description: 'One of the most loved homes on Al-Baith',
+                title: 'Home-Style Living',
+                description: 'Full kitchen and separate living areas',
             },
             {
                 icon: <Home className="w-6 h-6" />,
-                title: 'Entire apartment',
-                description: 'You\'ll have the whole place to yourself',
+                title: 'Flexible Stays',
+                description: 'Perfect for long-term and family group bookings',
             },
         ],
-        amenities: ['WiFi', 'TV', 'Air Conditioning', 'Kitchen', 'Living Room', 'Ocean View', 'Coffee Maker', 'Refrigerator', 'Washing Machine'],
+        amenities: ['Free Wi-Fi', 'Television', 'Air Conditioning', 'Heater', 'Power Backup', 'Full Kitchen', 'Living Area', 'Separate Bedrooms', 'Attached Bathrooms'],
         isGuestFavorite: true,
     },
 };
