@@ -32,207 +32,16 @@ interface RoomDetails {
         title: string;
         description: string;
     }>;
-    amenities: string[];
+    amenities: Array<{
+        icon: React.ReactNode;
+        title: string;
+        description: string;
+    }>;
     isGuestFavorite: boolean;
 }
 
 // Mock data - in real app, this would come from API
-const roomsData: Record<string, RoomDetails> = {
-    'suite-room': {
-        id: 'suite-room',
-        name: 'Suite Room',
-        type: 'Suite Room',
-        location: 'Kochi, Kerala, India',
-        rating: 4.9,
-        reviewCount: 1092,
-        price: 2500,
-        currency: '₹',
-        images: [
-            '/images/suite-room.png',
-            '/images/suite-room-1.jpg',
-            '/images/suite-room-2.jpg',
-            '/images/suite-room-3.jpg',
-            '/images/suite-room-4.jpg',
-            '/images/suite-room-5.jpg',
-        ],
-        guests: 4,
-        bedrooms: 1,
-        bathrooms: 1,
-        beds: 'King Bed',
-        size: '45 m²',
-        description: 'A premium room offering more space and added conveniences for a comfortable extended stay. Perfect for families or guests seeking premium comfort.',
-        host: {
-            name: 'Al Baith Resthouse',
-            image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
-            yearsHosting: 3,
-            superhost: true,
-        },
-        highlights: [
-            {
-                icon: <Award className="w-6 h-6" />,
-                title: 'Guest favourite',
-                description: 'One of the most loved homes on Al-Baith, according to guests',
-            },
-            {
-                icon: <Home className="w-6 h-6" />,
-                title: 'Premium Comfort',
-                description: 'Ideal for extended stays with added conveniences',
-            },
-            {
-                icon: <Shield className="w-6 h-6" />,
-                title: 'Free cancellation',
-                description: 'Flexible refund policy available',
-            },
-        ],
-        amenities: ['Free Wi-Fi', 'Television', 'Air Conditioning', 'Heater', 'Power Backup', 'Attached Bathroom', 'Mini fridge', 'Mini kitchen'],
-        isGuestFavorite: true,
-    },
-    'deluxe-room': {
-        id: 'deluxe-room',
-        name: 'Deluxe Room',
-        type: 'Deluxe',
-        location: 'Kochi, Kerala, India',
-        rating: 4.8,
-        reviewCount: 856,
-        price: 1800,
-        currency: '₹',
-        images: [
-            '/images/deluxe-main.jpg',
-            '/images/deluxe-2.jpg',
-            '/images/deluxe-1.jpg',
-            '/images/deluxe-bathroom.jpg',
-        ],
-        guests: 3,
-        bedrooms: 1,
-        bathrooms: 1,
-        beds: '1 King Bed',
-        size: '120 sq.ft (11 sq.mt)',
-        description: 'A spacious upgrade from the standard room with extra space to accommodate an additional bed. Ideal for small families or guests needing extra space.',
-        host: {
-            name: 'Al Baith Resthouse',
-            image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
-            yearsHosting: 3,
-            superhost: true,
-        },
-        highlights: [
-            {
-                icon: <Home className="w-6 h-6" />,
-                title: 'Extra Space',
-                description: 'Accommodates an additional bed for a 3rd guest',
-            },
-            {
-                icon: <Shield className="w-6 h-6" />,
-                title: 'Free cancellation',
-                description: 'Cancel anytime before check-in',
-            },
-        ],
-        amenities: ['Free Wi-Fi', 'Television', 'Air Conditioning', 'Heater', 'Power Backup', 'Attached Bathroom'],
-        isGuestFavorite: true,
-    },
-    'standard-room': {
-        id: 'standard-room',
-        name: 'Standard Room',
-        type: 'Standard',
-        location: 'Kochi, Kerala, India',
-        rating: 4.7,
-        reviewCount: 634,
-        price: 1500,
-        currency: '₹',
-        images: [
-            '/images/standard-1.jpg',
-            '/images/standard-2.jpg',
-            '/images/standard-tv.jpg',
-            '/images/standard-bathroom.jpg',
-            '/images/standard-misc.jpg',
-        ],
-        guests: 2,
-        bedrooms: 1,
-        bathrooms: 1,
-        beds: 'Queen Bed',
-        size: '35 m²',
-        description: 'A simple, comfortable room ideal for short stays and solo or couple guests. Best suited for budget stays with all essential comforts.',
-        host: {
-            name: 'Al Baith Resthouse',
-            image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
-            yearsHosting: 3,
-            superhost: true,
-        },
-        highlights: [
-            {
-                icon: <Home className="w-6 h-6" />,
-                title: 'Budget Friendly',
-                description: 'All essential comforts at an affordable price',
-            },
-            {
-                icon: <Shield className="w-6 h-6" />,
-                title: 'Free cancellation',
-                description: 'Flexible booking options',
-            },
-        ],
-        amenities: ['Free Wi-Fi', 'Television', 'Air Conditioning', 'Heater', 'Power Backup', 'Attached Bathroom'],
-        isGuestFavorite: false,
-    },
-    'apartment': {
-        id: 'apartment',
-        name: 'Apartment',
-        type: 'Apartment',
-        location: 'Kochi, Kerala, India',
-        rating: 5.0,
-        reviewCount: 423,
-        price: 3000,
-        currency: '₹',
-        images: [
-            'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070',
-            'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925',
-            'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1974',
-            'https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1974',
-            'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925',
-        ],
-        guests: 6, // Base for higher BHKs, description clarifies variations
-        bedrooms: 3,
-        bathrooms: 3,
-        beds: 'Multiple BHK Options',
-        size: 'Varies by Type',
-        description: 'Fully furnished apartments designed for families and long-term stays with complete home-style facilities. Available in 1 BHK, 2 BHK, and 3 BHK configurations. Best choice for families, groups, and long-duration stays.',
-        host: {
-            name: 'Al Baith Resthouse',
-            image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
-            yearsHosting: 3,
-            superhost: true,
-        },
-        highlights: [
-            {
-                icon: <Award className="w-6 h-6" />,
-                title: 'Home-Style Living',
-                description: 'Full kitchen and separate living areas',
-            },
-            {
-                icon: <Home className="w-6 h-6" />,
-                title: 'Flexible Stays',
-                description: 'Perfect for long-term and family group bookings',
-            },
-        ],
-        amenities: ['Free Wi-Fi', 'Television', 'Air Conditioning', 'Heater', 'Power Backup', 'Full Kitchen', 'Living Area', 'Separate Bedrooms', 'Attached Bathrooms'],
-        isGuestFavorite: true,
-    },
-};
 
-const getAmenityIcon = (name: string) => {
-    const lower = name.toLowerCase();
-    if (lower.includes('wifi')) return <Wifi className="w-6 h-6" />;
-    if (lower.includes('tv')) return <Tv className="w-6 h-6" />;
-    if (lower.includes('ac') || lower.includes('air conditioning')) return <Wind className="w-6 h-6" />;
-    if (lower.includes('kitchen') || lower.includes('kettle') || lower.includes('fridge')) return <Utensils className="w-6 h-6" />;
-    if (lower.includes('coffee')) return <Coffee className="w-6 h-6" />;
-    if (lower.includes('bath') || lower.includes('toilet') || lower.includes('shaving') || lower.includes('geyser') || lower.includes('heater')) return <Bath className="w-6 h-6" />;
-    if (lower.includes('water') || lower.includes('clean') || lower.includes('toiletries')) return <Droplets className="w-6 h-6" />;
-    if (lower.includes('housekeeping')) return <Clock className="w-6 h-6" />;
-    if (lower.includes('charging')) return <Zap className="w-6 h-6" />;
-    if (lower.includes('chair')) return <Armchair className="w-6 h-6" />;
-    if (lower.includes('curtains')) return <Moon className="w-6 h-6" />;
-    if (lower.includes('parking')) return <Home className="w-6 h-6" />;
-    return <Sparkles className="w-6 h-6" />;
-};
 
 const RoomDetailsPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -279,7 +88,51 @@ const RoomDetailsPage: React.FC = () => {
         setShowCheckInCalendar(false);
     };
 
-    const room = ROOMS_DATA.find(r => r.id === id) || ROOMS_DATA[0];
+    // Find room from constants
+    const foundRoom = ROOMS_DATA.find(r => r.id === id) || ROOMS_DATA[0];
+
+    // Adapter to match RoomDetails Page expectations
+    const room = {
+        ...foundRoom,
+        name: foundRoom.roomName,
+        type: foundRoom.roomType,
+        images: [
+            foundRoom.imageUrl,
+            "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+            "https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80",
+            "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+            "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+        ],
+        host: {
+            name: "Al Baith Resthouse",
+            image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=256",
+            isSuperhost: true,
+            yearsHosting: 5,
+            superhost: true // Add alias for compatibility
+        },
+        description: "Experience the epitome of luxury in our meticulously designed room. Featuring locally sourced wooden furniture, traditional Kerala art, and modern amenities, this space offers a perfect blend of comfort and culture. Wake up to the sound of birds and enjoy your morning coffee with a stunning view.",
+        amenities: foundRoom.features.map(f => ({
+            icon: f.icon,
+            title: f.label,
+            description: "Included in your stay"
+        })),
+        guests: 2,
+        bedrooms: 1,
+        bathrooms: 1,
+        highlights: [
+            {
+                icon: <Award className="w-6 h-6" />,
+                title: 'Guest favourite',
+                description: 'One of the most loved homes on Al-Baith',
+            },
+            {
+                icon: <Shield className="w-6 h-6" />,
+                title: 'Free cancellation',
+                description: 'Flexible refund policy available',
+            }
+        ],
+        isGuestFavorite: true
+    };
 
     if (!room) {
         return (
@@ -439,8 +292,8 @@ const RoomDetailsPage: React.FC = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {room.amenities.map((amenity, index) => (
                                     <div key={index} className="flex items-center gap-4 py-3">
-                                        {getAmenityIcon(amenity)}
-                                        <span>{amenity}</span>
+                                        <div className="text-gray-600">{amenity.icon}</div>
+                                        <span>{amenity.title}</span>
                                     </div>
                                 ))}
                             </div>
