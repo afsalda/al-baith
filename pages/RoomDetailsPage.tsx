@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { MapPin, Star, Heart, Share2, Wifi, Tv, Wind, Coffee, Users, Home, Calendar, Shield, Award, Clock, Droplets, Zap, Armchair, Moon, Flame, Bath, Sparkles, Utensils } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { roomsData } from '../constants';
+import CompactCalendar from '../components/CompactCalendar';
 
 interface RoomDetails {
     id: string;
@@ -237,15 +239,44 @@ const RoomDetailsPage: React.FC = () => {
     const navigate = useNavigate();
     const [saved, setSaved] = useState(false);
     const [showAllPhotos, setShowAllPhotos] = useState(false);
-    const [checkInDate, setCheckInDate] = useState('');
-    const [checkOutDate, setCheckOutDate] = useState('');
+    const [checkInDate, setCheckInDate] = useState<Date | null>(null);
+    const [checkOutDate, setCheckOutDate] = useState<Date | null>(null);
+    const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
+    const [showCheckOutCalendar, setShowCheckOutCalendar] = useState(false);
+    const [guests, setGuests] = useState('1 guest');
 
     const handleReserve = () => {
         if (!checkInDate || !checkOutDate) {
             alert('Please select both check-in and check-out dates to continue.');
             return;
         }
-        navigate(`/booking/${id}`);
+
+        // Check if same day
+        if (checkInDate.toDateString() === checkOutDate.toDateString()) {
+            alert('Same-day check-in and check-out is not allowed. Please select at least one night.');
+            return;
+        }
+
+        // Check if out is before in (Already handled by minDate in UI, but good for safety)
+        if (checkOutDate < checkInDate) {
+            alert('Check-out date must be after check-in date.');
+            return;
+        }
+
+        // Format for URL
+        const formatDate = (date: Date) => date.toISOString().split('T')[0];
+
+        navigate(`/booking/${id}?checkIn=${formatDate(checkInDate)}&checkOut=${formatDate(checkOutDate)}&guests=${guests}`);
+    };
+
+    const toggleCheckIn = () => {
+        setShowCheckInCalendar(!showCheckInCalendar);
+        setShowCheckOutCalendar(false);
+    };
+
+    const toggleCheckOut = () => {
+        setShowCheckOutCalendar(!showCheckOutCalendar);
+        setShowCheckInCalendar(false);
     };
 
     const room = roomsData[id || 'suite-room'];
@@ -481,33 +512,56 @@ const RoomDetailsPage: React.FC = () => {
                                 </div>
 
                                 {/* Date Inputs */}
-                                <div className="grid grid-cols-2 border border-gray-400 rounded-lg mb-4 overflow-hidden">
-                                    <div className="p-3 border-r border-gray-400">
+                                <div className="grid grid-cols-2 border border-gray-400 rounded-lg mb-4 overflow-visible relative">
+                                    <div className="p-3 border-r border-gray-400 relative">
                                         <div className="text-xs font-semibold mb-1">CHECK-IN</div>
                                         <input
-                                            type="date"
-                                            className="text-sm w-full outline-none cursor-pointer"
-                                            min={new Date().toISOString().split('T')[0]}
-                                            value={checkInDate}
-                                            onChange={(e) => setCheckInDate(e.target.value)}
+                                            type="text"
+                                            readOnly
+                                            placeholder="Add date"
+                                            className="text-sm w-full outline-none cursor-pointer bg-transparent"
+                                            value={checkInDate ? checkInDate.toLocaleDateString() : ''}
+                                            onClick={toggleCheckIn}
                                         />
+                                        {showCheckInCalendar && (
+                                            <CompactCalendar
+                                                selectedDate={checkInDate}
+                                                onDateSelect={(date) => setCheckInDate(date)}
+                                                onClose={() => setShowCheckInCalendar(false)}
+                                                minDate={new Date()}
+                                            // Mobile adjustment: position centrally or leave absolute
+                                            />
+                                        )}
                                     </div>
-                                    <div className="p-3">
+                                    <div className="p-3 relative">
                                         <div className="text-xs font-semibold mb-1">CHECKOUT</div>
                                         <input
-                                            type="date"
-                                            className="text-sm w-full outline-none cursor-pointer"
-                                            min={checkInDate || new Date().toISOString().split('T')[0]}
-                                            value={checkOutDate}
-                                            onChange={(e) => setCheckOutDate(e.target.value)}
+                                            type="text"
+                                            readOnly
+                                            placeholder="Add date"
+                                            className="text-sm w-full outline-none cursor-pointer bg-transparent"
+                                            value={checkOutDate ? checkOutDate.toLocaleDateString() : ''}
+                                            onClick={toggleCheckOut}
                                         />
+                                        {showCheckOutCalendar && (
+                                            <CompactCalendar
+                                                selectedDate={checkOutDate}
+                                                onDateSelect={(date) => setCheckOutDate(date)}
+                                                onClose={() => setShowCheckOutCalendar(false)}
+                                                minDate={checkInDate ? new Date(checkInDate.getTime() + 86400000) : new Date()}
+                                            />
+                                        )}
                                     </div>
                                 </div>
 
                                 {/* Guests */}
                                 <div className="border border-gray-400 rounded-lg p-3 mb-6">
                                     <div className="text-xs font-semibold mb-1">GUESTS</div>
-                                    <select className="text-sm w-full outline-none cursor-pointer">
+                                    <select
+                                        className="text-sm w-full outline-none cursor-pointer bg-transparent"
+                                        value={guests}
+                                        onChange={(e) => setGuests(e.target.value)}
+                                    >
                                         <option>1 guest</option>
                                         <option>2 guests</option>
                                         <option>3 guests</option>

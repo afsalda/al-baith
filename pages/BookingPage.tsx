@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Star, CheckCircle2, Lock } from 'lucide-react';
 import LoginModal from '../components/LoginModal';
@@ -8,6 +8,19 @@ import { ROOMS_DATA } from '../constants';
 const BookingPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
+    const checkInParam = searchParams.get('checkIn');
+    const checkOutParam = searchParams.get('checkOut');
+    const guestsParam = searchParams.get('guests') || '1 adult';
+
+    // Parse dates or fallback to mock
+    const checkInDate = checkInParam ? new Date(checkInParam) : new Date('2026-02-06');
+    const checkOutDate = checkOutParam ? new Date(checkOutParam) : new Date('2026-02-08');
+
+    // Calculate nights
+    const diffTime = Math.abs(checkOutDate.getTime() - checkInDate.getTime());
+    const numberOfNights = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 
     // States for sequential flow
     const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -18,7 +31,16 @@ const BookingPage: React.FC = () => {
 
     // Dynamic room lookup
     const room = ROOMS_DATA.find(r => r.id === id) || ROOMS_DATA[0];
-    const originalPrice = room.price * 1.2; // Example mockup logic for strike-through price
+    const originalPrice = room.price * 1.2;
+
+    // Derived costs
+    const basePrice = room.price * numberOfNights;
+    const taxes = 330;
+    const totalPrice = basePrice + taxes;
+
+    // Format display dates
+    const checkInStr = checkInDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    const checkOutStr = checkOutDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
     const handleLogin = () => {
         setIsLoginModalOpen(true);
@@ -58,7 +80,7 @@ const BookingPage: React.FC = () => {
                     </div>
                     <h1 className="text-4xl font-bold mb-4">You're booked!</h1>
                     <p className="text-neutral-600 mb-8 text-lg">
-                        Your reservation for {room.roomName} is confirmed. Details have been sent to your email.
+                        Your reservation for {room.roomName} is confirmed for {numberOfNights} night{numberOfNights > 1 ? 's' : ''}. Details have been sent to your email.
                     </p>
                     <button
                         onClick={() => navigate('/')}
@@ -201,7 +223,7 @@ const BookingPage: React.FC = () => {
 
                             {/* Cancellation */}
                             <p className="text-[14px] leading-relaxed">
-                                Cancel before check-in on 6 February for a partial refund. <span className="underline font-semibold cursor-pointer">Full policy</span>
+                                Cancel before check-in on {checkInStr.split(' ').slice(0, 2).join(' ')} for a partial refund. <span className="underline font-semibold cursor-pointer">Full policy</span>
                             </p>
 
                             <hr className="border-neutral-100" />
@@ -211,16 +233,16 @@ const BookingPage: React.FC = () => {
                                 <div className="flex justify-between items-center">
                                     <div className="text-[14px]">
                                         <p className="font-semibold">Dates</p>
-                                        <p>6–8 Feb 2026</p>
+                                        <p>{checkInStr} – {checkOutStr}</p>
                                     </div>
-                                    <button className="bg-[#F7F7F7] px-4 py-2 rounded-lg text-[14px] font-semibold">Change</button>
+                                    <button onClick={() => navigate(-1)} className="bg-[#F7F7F7] px-4 py-2 rounded-lg text-[14px] font-semibold">Change</button>
                                 </div>
                                 <div className="flex justify-between items-center text-[14px]">
                                     <div>
                                         <p className="font-semibold">Guests</p>
-                                        <p>1 adult</p>
+                                        <p>{guestsParam}</p>
                                     </div>
-                                    <button className="bg-[#F7F7F7] px-4 py-2 rounded-lg text-[14px] font-semibold">Change</button>
+                                    <button onClick={() => navigate(-1)} className="bg-[#F7F7F7] px-4 py-2 rounded-lg text-[14px] font-semibold">Change</button>
                                 </div>
                             </div>
 
@@ -231,15 +253,15 @@ const BookingPage: React.FC = () => {
                                 <h3 className="text-[22px] font-semibold">Price details</h3>
                                 <div className="space-y-3 text-[16px]">
                                     <div className="flex justify-between">
-                                        <span>2 nights x ₹{room.price.toLocaleString()}</span>
+                                        <span>{numberOfNights} nights x ₹{room.price.toLocaleString()}</span>
                                         <div className="flex gap-2">
-                                            <span className="text-neutral-400 line-through">₹{(originalPrice * 2).toLocaleString()}</span>
-                                            <span>₹{(room.price * 2).toLocaleString()}</span>
+                                            <span className="text-neutral-400 line-through">₹{(originalPrice * numberOfNights).toLocaleString()}</span>
+                                            <span>₹{basePrice.toLocaleString()}</span>
                                         </div>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="underline">Taxes</span>
-                                        <span>₹330</span>
+                                        <span>₹{taxes}</span>
                                     </div>
                                 </div>
                             </div>
@@ -250,7 +272,7 @@ const BookingPage: React.FC = () => {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center text-[16px] font-semibold">
                                     <span>Total (INR)</span>
-                                    <span>₹{(room.price * 2 + 330).toLocaleString()}</span>
+                                    <span>₹{totalPrice.toLocaleString()}</span>
                                 </div>
                                 <div className="text-right">
                                     <button className="text-[14px] font-semibold underline">Price breakdown</button>
