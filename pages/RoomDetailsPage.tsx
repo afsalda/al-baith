@@ -38,7 +38,7 @@ interface RoomDetails {
 const roomsData: Record<string, RoomDetails> = {
     'suite-room': {
         id: 'suite-room',
-        name: 'Elegant Suite Room',
+        name: 'Suite Room',
         type: 'Suite Room',
         location: 'Kochi, Kerala, India',
         rating: 4.9,
@@ -46,19 +46,19 @@ const roomsData: Record<string, RoomDetails> = {
         price: 2500,
         currency: '₹',
         images: [
-            '/images/suite-room.png', // Keeping the first one as main if desired, or replace with suite-room-1.jpg
+            '/images/suite-room.png',
             '/images/suite-room-1.jpg',
             '/images/suite-room-2.jpg',
             '/images/suite-room-3.jpg',
             '/images/suite-room-4.jpg',
             '/images/suite-room-5.jpg',
         ],
-        guests: 2,
+        guests: 4,
         bedrooms: 1,
         bathrooms: 1,
         beds: 'King Bed',
         size: '45 m²',
-        description: "Experience the royal essence of Al-Baith, a sanctuary where timeless Arabic hospitality meets modern luxury. Every detail of our suite is crafted to offer a majestic retreat, featuring exquisite interiors, golden accents, and an ambiance of serenity. At Al-Baith, we don't just host; we honor our guests with a tradition of warmth, ensuring a stay that is as grand as it is comfortable.",
+        description: 'A premium room offering more space and added conveniences for a comfortable extended stay. Perfect for families or guests seeking premium comfort.',
         host: {
             name: 'Al-Baith Hospitality',
             image: 'https://ui-avatars.com/api/?name=Al+Baith&background=C79D27&color=fff&size=128',
@@ -73,16 +73,16 @@ const roomsData: Record<string, RoomDetails> = {
             },
             {
                 icon: <Home className="w-6 h-6" />,
-                title: 'Entire suite',
-                description: 'You\'ll have the suite to yourself',
+                title: 'Premium Comfort',
+                description: 'Ideal for extended stays with added conveniences',
             },
             {
                 icon: <Shield className="w-6 h-6" />,
-                title: 'Free cancellation before 22 February',
-                description: 'Get a full refund if you change your mind',
+                title: 'Free cancellation',
+                description: 'Flexible refund policy available',
             },
         ],
-        amenities: ['WiFi', 'TV', 'Air Conditioning', 'Coffee Maker', 'Mini Fridge', 'Hot Water', 'Free Parking', 'Kitchen', 'Toiletries', 'Clean Towels'],
+        amenities: ['Free Wi-Fi', 'Television', 'Air Conditioning', 'Heater', 'Power Backup', 'Attached Bathroom', 'Mini fridge', 'Mini kitchen'],
         isGuestFavorite: true,
     },
     'deluxe-room': {
