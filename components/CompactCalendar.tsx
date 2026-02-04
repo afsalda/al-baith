@@ -2,8 +2,12 @@
 import React, { useState } from 'react';
 
 interface CompactCalendarProps {
-    selectedDate: Date | null;
-    onDateSelect: (date: Date) => void;
+    mode?: 'single' | 'range';
+    selectedDate?: Date | null;
+    startDate?: Date | null;
+    endDate?: Date | null;
+    onDateSelect?: (date: Date) => void;
+    onRangeSelect?: (start: Date | null, end: Date | null) => void;
     minDate?: Date;
     onClose: () => void;
 }
