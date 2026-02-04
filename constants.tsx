@@ -312,9 +312,10 @@ export const ROOMS_DATA: Room[] = [
       { icon: <Bath className="h-4 w-4" />, label: "Attached Bathroom" },
     ],
     available: true,
-    beds: "1 King Bed",
+    available: true,
+    beds: "1 King Bed + 1 Single Bed",
     size: "120 sq.ft (11 sq.mt)",
-    guests: 5,
+    guests: 3,
   },
   {
     id: "standard-room",
