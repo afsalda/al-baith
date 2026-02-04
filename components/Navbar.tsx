@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { AnimatedText } from './ui/animated-shiny-text';
-import CompactCalendar from './CompactCalendar';
+import CalendarModal from './CalendarModal';
 import GuestModal from './GuestModal';
 import { ViewMode } from '../types';
 
@@ -15,15 +15,14 @@ const Navbar: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [activeSearchSection, setActiveSearchSection] = useState<'when' | 'who' | null>(null);
 
-  // Date State for Range
-  const [startDate, setStartDate] = useState<Date | null>(null);
-  const [endDate, setEndDate] = useState<Date | null>(null);
+  // Single Date State (Reverted from Range)
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   // Determine current view based on route
   const currentView: ViewMode = location.pathname === '/experiences' ? 'experiences' :
     location.pathname === '/services' ? 'services' : 'homes';
 
-  // Lifted state for guest counts so the Search button can access them
+  // Lifted state for guest counts
   const [guestCounts, setGuestCounts] = useState({
     adults: 0,
     children: 0,
@@ -31,10 +30,14 @@ const Navbar: React.FC = () => {
     pets: 0
   });
 
-  // Handler for range selection
-  const handleRangeSelect = (start: Date | null, end: Date | null) => {
-    setStartDate(start);
-    setEndDate(end);
+  // Handler for single date selection
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+    // CalendarModal stays open until user clicks explicitly or we can close it?
+    // CalendarModal usually closes itself or we close it.
+    // Let's keep existing behavior if possible, but for search bar we usually want it closed after selection?
+    // The previous implementation in Navbar had: setShowCalendar(false) inside handleSearch or similar.
+    // CalendarModal prop onClose={() => setShowCalendar(false)} handles closing.
   };
 
   // Sync active section with dropdown states
@@ -52,39 +55,17 @@ const Navbar: React.FC = () => {
 
     const totalGuests = guestCounts.adults + guestCounts.children;
 
-    // Simulate search delay then navigate with params
     setTimeout(() => {
       setIsSearching(false);
       setShowCalendar(false);
       setShowGuestModal(false);
 
-      // Navigate to Home with search params (or a search results page if one existed)
-      // Since we don't have a search results page, we'll just reload Home with params 
-      // which assumes Home might eventually filter based on them.
-      // For now, let's just create the URL - user asked to "make it workable". 
-      // Navigating with params is "workable". 
-
       const params = new URLSearchParams();
-      if (startDate) params.set('checkIn', startDate.toISOString().split('T')[0]); // Use YYYY-MM-DD
-      if (endDate) params.set('checkOut', endDate.toISOString().split('T')[0]);
+      if (selectedDate) params.set('checkIn', selectedDate.toISOString().split('T')[0]);
       if (totalGuests > 0) params.set('guests', totalGuests.toString());
 
-      // If we selected a specific room implicitly? No.
-      // Just go to home (or stay) with params.
       navigate(`/?${params.toString()}`);
-
     }, 600);
-  };
-
-  // Format date range for display
-  const getDateDisplay = () => {
-    if (startDate && endDate) {
-      return `${startDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} - ${endDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })}`;
-    }
-    if (startDate) {
-      return `${startDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })} - Add checkout`;
-    }
-    return 'Add dates';
   };
 
   return (
@@ -219,7 +200,10 @@ const Navbar: React.FC = () => {
               >
                 <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-wider">When</span>
                 <span className="text-xs md:text-sm text-neutral-500 truncate">
-                  {getDateDisplay()}
+                  {selectedDate
+                    ? selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
+                    : 'Add dates'
+                  }
                 </span>
               </div>
 
@@ -262,13 +246,10 @@ const Navbar: React.FC = () => {
             </div>
 
             {showCalendar && (
-              <CompactCalendar
-                mode="range"
-                startDate={startDate}
-                endDate={endDate}
-                onRangeSelect={handleRangeSelect}
+              <CalendarModal
+                currentView={currentView}
+                onDateSelect={handleDateSelect}
                 onClose={() => setShowCalendar(false)}
-                minDate={new Date()}
               />
             )}
             {showGuestModal && (
