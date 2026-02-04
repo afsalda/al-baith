@@ -85,7 +85,7 @@ const Navbar: React.FC = () => {
                 className="py-0"
                 style={{ fontFamily: '"Cinzel Decorative", cursive' }}
                 gradientColors="linear-gradient(90deg, #B8860B, #FFD700, #FFF, #FFD700, #B8860B)"
-                gradientAnimationDuration={10}
+                gradientAnimationDuration={15}
               />
             </Link>
           </div>
