@@ -290,7 +290,7 @@ export const ROOMS_DATA: Room[] = [
     available: true,
     beds: "King Bed",
     size: "45 m²",
-    guests: 2,
+    guests: 5,
   },
   {
     id: "deluxe-room",
@@ -314,7 +314,7 @@ export const ROOMS_DATA: Room[] = [
     available: true,
     beds: "1 King Bed",
     size: "120 sq.ft (11 sq.mt)",
-    guests: 2,
+    guests: 5,
   },
   {
     id: "standard-room",
@@ -364,6 +364,6 @@ export const ROOMS_DATA: Room[] = [
     available: false,
     beds: "Multiple BHK Options",
     size: "80 m²",
-    guests: 6,
+    guests: 10,
   },
 ];
