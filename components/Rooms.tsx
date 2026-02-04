@@ -29,11 +29,9 @@ const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
     };
 
     return (
-        <motion.div
+        <div
             onClick={handleCardClick}
-            className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-900 shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg cursor-pointer"
-            whileHover={{ y: -4 }}
-            transition={{ type: "spring", stiffness: 300 }}
+            className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-900 shadow-sm transition-all duration-300 ease-in-out hover:y-[-4px] hover:shadow-lg cursor-pointer"
         >
             <div className="relative h-64 w-full overflow-hidden">
                 <img
@@ -110,7 +108,7 @@ const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
                     </Button>
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
 };
 
@@ -162,18 +160,15 @@ const Rooms: React.FC<RoomsProps> = ({
                     </motion.p>
                 </div>
 
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
+                <div
                     className="grid gap-8 md:grid-cols-2 lg:grid-cols-2"
                 >
                     {rooms.map((room) => (
-                        <motion.div key={room.id} variants={itemVariants}>
+                        <div key={room.id}>
                             <RoomCard room={room} />
-                        </motion.div>
+                        </div>
                     ))}
-                </motion.div>
+                </div>
             </div>
         </section>
     );
