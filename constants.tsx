@@ -290,7 +290,7 @@ export const ROOMS_DATA: Room[] = [
     available: true,
     beds: "King Bed",
     size: "45 m²",
-    guests: 5,
+    guests: 4,
   },
   {
     id: "deluxe-room",
