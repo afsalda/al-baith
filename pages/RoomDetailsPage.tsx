@@ -279,7 +279,7 @@ const RoomDetailsPage: React.FC = () => {
         setShowCheckInCalendar(false);
     };
 
-    const room = roomsData[id || 'suite-room'];
+    const room = ROOMS_DATA.find(r => r.id === id) || ROOMS_DATA[0];
 
     if (!room) {
         return (
