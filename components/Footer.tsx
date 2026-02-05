@@ -14,19 +14,12 @@ const Footer: React.FC = () => {
                 <Link to="/help" className="hover:underline cursor-pointer">Help Center</Link>
               </li>
               <li className="hover:underline cursor-pointer">Disability support</li>
-              <li className="hover:underline cursor-pointer">Cancellation options</li>
+              <li>
+                <Link to="/cancellation-policy" className="hover:underline cursor-pointer">Cancellation options</Link>
+              </li>
             </ul>
           </div>
-          <div className="space-y-4">
-            <h5 className="font-bold">Hosting</h5>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li className="hover:underline cursor-pointer">Al-Baith your home</li>
-              <li className="hover:underline cursor-pointer">AirCover for Hosts</li>
-              <li className="hover:underline cursor-pointer">Hosting resources</li>
-              <li className="hover:underline cursor-pointer">Community forum</li>
-              <li className="hover:underline cursor-pointer">Hosting responsibly</li>
-            </ul>
-          </div>
+
           <div className="space-y-4">
             <h5 className="font-bold">Al-Baith</h5>
             <ul className="space-y-2 text-sm text-gray-600">

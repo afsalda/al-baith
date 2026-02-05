@@ -68,7 +68,6 @@ const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
                 <div className="space-y-3 flex-grow">
                     <div className="flex items-center justify-between text-sm text-gray-500">
                         <span>{room.beds}</span>
-                        <span>{room.size}</span>
                     </div>
 
                     <div className="flex flex-wrap gap-2">

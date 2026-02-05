@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, Star, CheckCircle2, Lock } from 'lucide-react';
 import LoginModal from '../components/LoginModal';
@@ -229,7 +229,7 @@ const BookingPage: React.FC = () => {
 
                             {/* Cancellation */}
                             <p className="text-[14px] leading-relaxed">
-                                Cancel before check-in on {checkInStr.split(' ').slice(0, 2).join(' ')} for a partial refund. <span className="underline font-semibold cursor-pointer">Full policy</span>
+                                Cancel before check-in 24 hours before check-in for a partial refund. <Link to="/cancellation-policy" className="underline font-semibold cursor-pointer">Full policy</Link>
                             </p>
 
                             <hr className="border-neutral-100" />

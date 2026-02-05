@@ -45,4 +45,5 @@ export interface Room {
   beds: string;
   size: string;
   guests: number;
+  images?: string[];
 }

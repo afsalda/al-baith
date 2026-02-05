@@ -289,7 +289,7 @@ export const ROOMS_DATA: Room[] = [
     ],
     available: true,
     beds: "King Bed",
-    size: "45 m²",
+    size: "",
     guests: 4,
   },
   {
@@ -313,7 +313,7 @@ export const ROOMS_DATA: Room[] = [
     ],
     available: true,
     beds: "1 King Bed + 1 Single Bed",
-    size: "120 sq.ft (11 sq.mt)",
+    size: "",
     guests: 3,
   },
   {
@@ -337,19 +337,19 @@ export const ROOMS_DATA: Room[] = [
     ],
     available: true,
     beds: "Queen Bed",
-    size: "35 m²",
+    size: "",
     guests: 2,
   },
   {
     id: "apartment",
-    imageUrl: "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?q=80&w=2070&auto=format&fit=crop",
-    imageAlt: "Presidential suite with ocean view",
+    imageUrl: "/images/apartment/apt-1.jpg",
+    imageAlt: "Luxury Apartments at Al-Baith",
     roomType: "Apartment",
     roomName: "Apartment",
     location: "Kochi, Kerala, India",
     rating: 5.0,
     reviewCount: 423,
-    price: 3000,
+    price: 3500,
     currency: "₹",
     features: [
       { icon: <Wifi className="h-4 w-4" />, label: "Wi-Fi" },
@@ -361,9 +361,50 @@ export const ROOMS_DATA: Room[] = [
       { icon: <Utensils className="h-4 w-4" />, label: "Full Kitchen" },
       { icon: <Sofa className="h-4 w-4" />, label: "Living Area" },
     ],
-    available: false,
-    beds: "Multiple BHK Options",
-    size: "80 m²",
-    guests: 10,
+    available: true,
+    beds: "1, 2, or 3 BHK Options",
+    size: "",
+    guests: 8,
+    images: [
+      "/images/apartment/apt-1.jpg",
+      "/images/apartment/apt-2.jpg",
+      "/images/apartment/apt-3.jpg",
+      "/images/apartment/apt-4.jpg",
+      "/images/apartment/apt-5.jpg",
+      "/images/apartment/apt-6.jpg",
+    ],
   },
+];
+
+export const APARTMENT_TYPES = [
+  {
+    id: "1bhk",
+    name: "1 BHK Apartment",
+    price: 3500,
+    guests: 3,
+    size: "",
+    beds: "1 King Bed",
+    features: ["Kitchen", "Living Area", "Attached Bathroom"],
+    image: "/images/apartment/apt-1.jpg"
+  },
+  {
+    id: "2bhk",
+    name: "2 BHK Apartment",
+    price: 5500,
+    guests: 5,
+    size: "",
+    beds: "2 King Beds",
+    features: ["Full Kitchen", "Spacious Living", "2 Bathrooms"],
+    image: "/images/apartment/apt-2.jpg"
+  },
+  {
+    id: "3bhk",
+    name: "3 BHK Apartment",
+    price: 7500,
+    guests: 8,
+    size: "",
+    beds: "3 King Beds",
+    features: ["Full Kitchen & Dining", "Elegant Living Area", "3 Bathrooms"],
+    image: "/images/apartment/apt-3.jpg"
+  }
 ];

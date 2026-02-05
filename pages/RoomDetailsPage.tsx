@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { MapPin, Star, Heart, Share2, Wifi, Tv, Wind, Coffee, Users, Home, Calendar, Shield, Award, Clock, Droplets, Zap, Armchair, Moon, Flame, Bath, Sparkles, Utensils } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { ROOMS_DATA } from '../constants';
+import { ROOMS_DATA, APARTMENT_TYPES } from '../constants';
 import CompactCalendar from '../components/CompactCalendar';
 
 interface RoomDetails {
@@ -53,6 +53,36 @@ const RoomDetailsPage: React.FC = () => {
     const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
     const [showCheckOutCalendar, setShowCheckOutCalendar] = useState(false);
     const [guests, setGuests] = useState('1 guest');
+    const [selectedBhkId, setSelectedBhkId] = useState('1bhk');
+    const [shareFeedback, setShareFeedback] = useState(false);
+
+    const isApartment = id === 'apartment';
+    const selectedBhk = isApartment ? APARTMENT_TYPES.find(b => b.id === selectedBhkId) || APARTMENT_TYPES[0] : null;
+
+    const handleShare = async () => {
+        const shareData = {
+            title: room.name,
+            text: `Check out this room at Al-Baith: ${room.name}`,
+            url: window.location.href
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.error('Error sharing:', err);
+            }
+        } else {
+            // Fallback to clipboard
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                setShareFeedback(true);
+                setTimeout(() => setShareFeedback(false), 2000);
+            } catch (err) {
+                console.error('Error copying to clipboard:', err);
+            }
+        }
+    };
 
     const handleReserve = () => {
         if (!checkInDate || !checkOutDate) {
@@ -81,7 +111,7 @@ const RoomDetailsPage: React.FC = () => {
             return `${year}-${month}-${day}`;
         };
 
-        navigate(`/booking/${id}?checkIn=${formatDate(checkInDate)}&checkOut=${formatDate(checkOutDate)}&guests=${guests}`);
+        navigate(`/booking/${id}?checkIn=${formatDate(checkInDate)}&checkOut=${formatDate(checkOutDate)}&guests=${guests}${isApartment ? `&bhk=${selectedBhkId}` : ''}`);
     };
 
     const toggleCheckIn = () => {
@@ -102,13 +132,15 @@ const RoomDetailsPage: React.FC = () => {
         ...foundRoom,
         name: foundRoom.roomName,
         type: foundRoom.roomType,
-        images: [
-            foundRoom.imageUrl,
-            "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-            "https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80",
-            "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
-            "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
-        ],
+        images: foundRoom.images && foundRoom.images.length > 0
+            ? foundRoom.images
+            : [
+                foundRoom.imageUrl,
+                "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                "https://images.unsplash.com/photo-1618773928121-c32242e63f39?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80",
+                "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80",
+                "https://images.unsplash.com/photo-1560448204-603b3fc33ddc?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+            ],
         host: {
             name: "Al Baith Resthouse",
             image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=256",
@@ -122,7 +154,6 @@ const RoomDetailsPage: React.FC = () => {
             title: f.label,
             description: "Included in your stay"
         })),
-        guests: 2,
         bedrooms: 1,
         bathrooms: 1,
         highlights: [
@@ -134,10 +165,22 @@ const RoomDetailsPage: React.FC = () => {
             {
                 icon: <Shield className="w-6 h-6" />,
                 title: 'Free cancellation',
-                description: 'Flexible refund policy available',
+                description: (
+                    <span>
+                        Flexible refund policy available. <Link to="/cancellation-policy" className="underline font-semibold cursor-pointer">View policy</Link>
+                    </span>
+                ),
             }
         ],
-        isGuestFavorite: true
+        isGuestFavorite: true,
+        // Apply apartment overrides if applicable
+        ...(isApartment && selectedBhk ? {
+            price: selectedBhk.price,
+            guests: selectedBhk.guests,
+            beds: selectedBhk.beds,
+            size: selectedBhk.size,
+            imageUrl: selectedBhk.image,
+        } : {})
     };
 
     if (!room) {
@@ -172,8 +215,21 @@ const RoomDetailsPage: React.FC = () => {
                                 <span className="font-semibold underline cursor-pointer">{room.location}</span>
                             </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <button className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+                        <div className="flex items-center gap-3 relative">
+                            {shareFeedback && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: 10 }}
+                                    className="absolute -top-12 left-0 bg-neutral-900 text-white text-xs py-2 px-3 rounded shadow-xl whitespace-nowrap z-50 pointer-events-none"
+                                >
+                                    Link copied to clipboard!
+                                </motion.div>
+                            )}
+                            <button
+                                onClick={handleShare}
+                                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition"
+                            >
                                 <Share2 className="w-4 h-4" />
                                 <span className="text-sm font-semibold underline">Share</span>
                             </button>
@@ -261,6 +317,28 @@ const RoomDetailsPage: React.FC = () => {
                                 />
                             </div>
                         </div>
+
+                        {/* BHK Selection for Apartments */}
+                        {isApartment && (
+                            <div className="py-8 border-b">
+                                <h3 className="text-xl font-semibold mb-6">Select Apartment Type</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {APARTMENT_TYPES.map((bhk) => (
+                                        <div
+                                            key={bhk.id}
+                                            onClick={() => setSelectedBhkId(bhk.id)}
+                                            className={`cursor-pointer p-4 rounded-xl border-2 transition-all ${selectedBhkId === bhk.id
+                                                ? 'border-amber-950 bg-amber-50 shadow-md scale-105'
+                                                : 'border-neutral-200 hover:border-neutral-300 bg-white'
+                                                }`}
+                                        >
+                                            <div className="font-bold text-neutral-900 mb-1">{bhk.name}</div>
+                                            <div className="text-amber-900 font-bold">₹{bhk.price.toLocaleString()}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Guest Favorite Badge */}
                         {room.isGuestFavorite && (
@@ -439,15 +517,6 @@ const RoomDetailsPage: React.FC = () => {
 
                             </motion.div>
 
-                            {/* Report Listing */}
-                            <div className="mt-6 text-center">
-                                <button className="text-sm text-gray-600 underline hover:text-gray-900 flex items-center gap-2 mx-auto">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                                    </svg>
-                                    Report this listing
-                                </button>
-                            </div>
                         </div>
                     </div>
                 </div>

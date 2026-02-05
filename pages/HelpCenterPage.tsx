@@ -1,70 +1,119 @@
 import React from 'react';
-import { Search, HelpCircle, FileQuestion, MessageCircle, Phone } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const HelpCenterPage: React.FC = () => {
-    const categories = [
-        { icon: <FileQuestion className="w-6 h-6 text-amber-600" />, title: 'Booking & Trips', desc: 'Manage your reservations' },
-        { icon: <HelpCircle className="w-6 h-6 text-amber-600" />, title: 'Account & Profile', desc: 'Login and settings' },
-        { icon: <MessageCircle className="w-6 h-6 text-amber-600" />, title: 'Contact Host', desc: 'Communication tips' },
-        { icon: <Phone className="w-6 h-6 text-amber-600" />, title: 'Safety & Trust', desc: 'Secure payments & stays' },
-    ];
-
-    const faqs = [
-        { q: 'How do I cancel my booking?', a: 'Go to your Trips page, select the reservation, and click Cancel.' },
-        { q: 'What payment methods are accepted?', a: 'We accept all major credit cards, PayPal, and Apple Pay.' },
-        { q: 'How do I contact the host?', a: 'You can message the host directly from the listing page or your trips.' },
-    ];
-
     return (
-        <div className="min-h-screen bg-white">
-            {/* Hero Section */}
-            <div className="bg-neutral-100 py-12 md:py-20 px-4 text-center">
-                <h1 className="text-3xl md:text-5xl font-bold text-neutral-900 mb-6">How can we help?</h1>
-                <div className="max-w-2xl mx-auto relative">
-                    <input
-                        type="text"
-                        placeholder="Search for answers..."
-                        className="w-full py-4 pl-12 pr-4 rounded-full border border-neutral-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent text-lg"
-                    />
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-500 w-6 h-6" />
-                </div>
+        <div className="min-h-screen bg-white font-['Inter',_sans-serif]">
+            {/* Simple Header */}
+            <div className="max-w-4xl mx-auto px-6 pt-16 pb-8 border-b border-neutral-100">
+                <h1 className="text-4xl font-bold text-neutral-900 mb-2">Help Center</h1>
+                <p className="text-neutral-500">Find answers to common questions about your stay.</p>
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 py-12">
-                {/* Categories */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-                    {categories.map((cat, idx) => (
-                        <div key={idx} className="p-6 border border-neutral-200 rounded-xl hover:shadow-lg transition cursor-pointer group">
-                            <div className="mb-4 p-3 bg-amber-50 rounded-full w-fit group-hover:bg-amber-100 transition">
-                                {cat.icon}
-                            </div>
-                            <h3 className="font-bold text-lg mb-2">{cat.title}</h3>
-                            <p className="text-neutral-500">{cat.desc}</p>
+            <div className="max-w-4xl mx-auto px-6 py-12 space-y-16">
+                {/* Booking */}
+                <section>
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center">
+                        <span className="w-2 h-2 bg-neutral-900 rounded-full mr-3"></span>
+                        Booking
+                    </h2>
+                    <div className="space-y-8 pl-5 border-l border-neutral-100">
+                        <div>
+                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">How do I book a room?</h3>
+                            <p className="text-neutral-600">You can book a room by sending a booking request via email.</p>
                         </div>
-                    ))}
-                </div>
-
-                {/* FAQs */}
-                <div className="max-w-3xl mx-auto">
-                    <h2 className="text-2xl font-bold mb-8 text-center md:text-left">Frequently Asked Questions</h2>
-                    <div className="space-y-6">
-                        {faqs.map((faq, idx) => (
-                            <div key={idx} className="border-b border-neutral-100 pb-6">
-                                <h3 className="text-lg font-semibold mb-2 text-neutral-800">{faq.q}</h3>
-                                <p className="text-neutral-600">{faq.a}</p>
-                            </div>
-                        ))}
+                        <div>
+                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">Can I cancel my booking?</h3>
+                            <p className="text-neutral-600">Yes, bookings can be cancelled. Please refer to our <Link to="/cancellation-policy" className="text-neutral-900 underline font-semibold">Cancellation Policy</Link> for details.</p>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">Is advance payment required?</h3>
+                            <p className="text-neutral-600">Yes, advance payment is required to confirm the booking.</p>
+                        </div>
                     </div>
-                </div>
+                </section>
 
-                {/* Contact Footer */}
-                <div className="mt-20 py-10 border-t border-neutral-200 text-center">
-                    <p className="text-neutral-500 mb-4">Still need help?</p>
-                    <button className="bg-black text-white px-8 py-3 rounded-lg font-semibold hover:bg-neutral-800 transition">
-                        Contact Support
-                    </button>
-                </div>
+                {/* Stay Information */}
+                <section>
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center">
+                        <span className="w-2 h-2 bg-neutral-900 rounded-full mr-3"></span>
+                        Stay Information
+                    </h2>
+                    <div className="space-y-8 pl-5 border-l border-neutral-100">
+                        <div>
+                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">What is the check-in time?</h3>
+                            <p className="text-neutral-600">Check-in time is 12:00 PM.</p>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">What is the check-out time?</h3>
+                            <p className="text-neutral-600">Check-out time is 11:00 AM.</p>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">Is an extra bed available?</h3>
+                            <p className="text-neutral-600">Extra bed facility is available for Suite and Deluxe rooms only.</p>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">What amenities are included?</h3>
+                            <p className="text-neutral-600 mb-2">All rooms include:</p>
+                            <ul className="grid grid-cols-2 gap-2 text-neutral-600 font-medium">
+                                <li className="flex items-center">• AC</li>
+                                <li className="flex items-center">• WiFi</li>
+                                <li className="flex items-center">• TV</li>
+                                <li className="flex items-center">• Heater</li>
+                                <li className="flex items-center">• Power backup</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Rules */}
+                <section>
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center">
+                        <span className="w-2 h-2 bg-neutral-900 rounded-full mr-3"></span>
+                        Rules
+                    </h2>
+                    <div className="space-y-8 pl-5 border-l border-neutral-100">
+                        <div>
+                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">Is smoking allowed?</h3>
+                            <p className="text-neutral-600">Yes, smoking is allowed.</p>
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">Are visitors allowed?</h3>
+                            <p className="text-neutral-600">Yes, visitors are allowed.</p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Contact */}
+                <section className="bg-neutral-50 p-8 rounded-2xl border border-neutral-100">
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center">
+                        <span className="w-2 h-2 bg-neutral-900 rounded-full mr-3"></span>
+                        Contact
+                    </h2>
+                    <p className="text-neutral-600 mb-8">For any questions or booking assistance, please contact us:</p>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center pb-3 border-b border-neutral-200">
+                            <span className="text-neutral-500 font-medium">Phone</span>
+                            <span className="text-neutral-900 select-all">____________________</span>
+                        </div>
+                        <div className="flex justify-between items-center pb-3 border-b border-neutral-200">
+                            <span className="text-neutral-500 font-medium">WhatsApp</span>
+                            <span className="text-neutral-900 select-all">____________________</span>
+                        </div>
+                        <div className="flex justify-between items-center pb-3 border-b border-neutral-200">
+                            <span className="text-neutral-500 font-medium">Email</span>
+                            <span className="text-neutral-900 select-all">____________________</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-neutral-500 font-medium">Support Hours</span>
+                            <span className="text-neutral-900">____________________</span>
+                        </div>
+                    </div>
+                </section>
             </div>
+
+            {/* Footer Padding */}
+            <div className="h-20"></div>
         </div>
     );
 };

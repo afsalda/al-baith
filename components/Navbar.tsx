@@ -164,13 +164,13 @@ const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
                 <div className="absolute -top-1 -right-2 bg-[#4A5568] text-white text-[6px] md:text-[8px] font-bold px-1 md:px-1.5 py-0.5 rounded-full">NEW</div>
               </div>
               <span className={`text-[10px] md:text-sm lg:text-base font-semibold ${currentView === 'services' ? 'text-black' : 'text-neutral-600 group-hover:text-black'} transition hidden md:inline`}>Services</span>
-              {currentView === 'services' && <div className="absolute -bottom-0 left-0 w-full h-0.5 md:h-1 bg-black rounded-full"></div>}
             </Link>
           </div>
 
+
           {/* Right: User Actions */}
           <div className="flex flex-row items-center gap-1 md:gap-3 shrink-0">
-            <div className="text-sm font-semibold p-2 md:p-3 hover:bg-neutral-100 rounded-full cursor-pointer transition hidden lg:block">Become a host</div>
+
             <div className="relative">
               <div
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -240,18 +240,21 @@ const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
                       </div>
                     </>
                   )}
-                  {!user && (
-                    <>
-                      <div className="h-[1px] bg-neutral-200 my-2"></div>
-                      <Link
-                        to="/help"
-                        className="px-4 py-3 hover:bg-neutral-50 cursor-pointer text-neutral-600 block transition"
-                        onClick={() => setIsMenuOpen(false)}
-                      >
-                        Help Center
-                      </Link>
-                    </>
-                  )}
+                  <div className="h-[1px] bg-neutral-200 my-2"></div>
+                  <Link
+                    to="/help"
+                    className="px-4 py-3 hover:bg-neutral-50 cursor-pointer text-neutral-600 block transition"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Help Center
+                  </Link>
+                  <Link
+                    to="/cancellation-policy"
+                    className="px-4 py-3 hover:bg-neutral-50 cursor-pointer text-neutral-600 block transition"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Cancellation options
+                  </Link>
                 </div>
               )}
             </div>
@@ -346,7 +349,7 @@ const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
           </div>
         </div>
       </div>
-    </header >
+    </header>
   );
 };
 

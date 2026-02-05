@@ -13,6 +13,7 @@ import BookingPage from './pages/BookingPage';
 import ProfilePage from './pages/ProfilePage';
 import AccountPage from './pages/AccountPage';
 import HelpCenterPage from './pages/HelpCenterPage';
+import CancellationPolicyPage from './pages/CancellationPolicyPage';
 import LoginModal from './components/LoginModal';
 
 const App: React.FC = () => {
@@ -43,6 +44,7 @@ const App: React.FC = () => {
         <Route path="/profile" element={<ProfilePage user={user} onOpenLogin={() => openLogin('login')} />} />
         <Route path="/account" element={<AccountPage user={user} />} />
         <Route path="/help" element={<HelpCenterPage />} />
+        <Route path="/cancellation-policy" element={<CancellationPolicyPage />} />
       </Routes>
       <Footer />
       <LoginModal
