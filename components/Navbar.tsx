@@ -5,9 +5,16 @@ import { ArrowLeft } from 'lucide-react';
 import { AnimatedText } from './ui/animated-shiny-text';
 import CalendarModal from './CalendarModal';
 import GuestModal from './GuestModal';
+import LoginModal from './LoginModal';
 import { ViewMode } from '../types';
 
-const Navbar: React.FC = () => {
+interface NavbarProps {
+  user: { fullName: string; email: string; phoneNumber: string; countryCode: string } | null;
+  setUser: (user: { fullName: string; email: string; phoneNumber: string; countryCode: string } | null) => void;
+  onOpenLogin: (mode: 'login' | 'signup') => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showCalendar, setShowCalendar] = useState(false);
@@ -30,14 +37,17 @@ const Navbar: React.FC = () => {
     pets: 0
   });
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+
   // Handler for single date selection
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    // CalendarModal stays open until user clicks explicitly or we can close it?
     // CalendarModal usually closes itself or we close it.
     // Let's keep existing behavior if possible, but for search bar we usually want it closed after selection?
     // The previous implementation in Navbar had: setShowCalendar(false) inside handleSearch or similar.
     // CalendarModal prop onClose={() => setShowCalendar(false)} handles closing.
+    setShowCalendar(false); // Auto close calendar on select
   };
 
   // Sync active section with dropdown states
@@ -84,13 +94,13 @@ const Navbar: React.FC = () => {
                 <ArrowLeft className="h-4 w-4 md:h-6 md:w-6 text-neutral-600 group-hover:text-amber-950" />
               </Link>
             )}
-            <Link to="/" className="flex flex-row items-center gap-1 cursor-pointer">
+            <Link to="/" className="flex flex-row items-center gap-1 cursor-pointer filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)]">
               <AnimatedText
                 text="Al-Baith"
                 textClassName="text-xl md:text-3xl lg:text-4xl tracking-wider font-bold"
                 className="py-0"
                 style={{ fontFamily: '"Cinzel Decorative", cursive' }}
-                gradientColors="linear-gradient(90deg, #B8860B, #FFD700, #FFF, #FFD700, #B8860B)"
+                gradientColors="linear-gradient(90deg, #B8860B, #FFD700, #FFF9C4, #FFD700, #B8860B)"
                 gradientAnimationDuration={15}
               />
             </Link>
@@ -104,11 +114,13 @@ const Navbar: React.FC = () => {
               className="flex flex-col items-center gap-1 cursor-pointer group py-2 relative"
             >
               {/* House Icon */}
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="md:w-6 md:h-6">
-                <path d="M3 10L12 3L21 10V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V10Z" stroke="#C79D27" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M9 22V12H15V22" stroke="#C79D27" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <rect x="11" y="7" width="2" height="2" fill="#4CAF50" />
-              </svg>
+              {/* House Icon - Modern 3D Style */}
+              {/* House Icon - Modern 3D Style */}
+              <img
+                src="/icons/house-3d.png"
+                alt="Homes"
+                className="w-5 h-5 md:w-8 md:h-8 object-contain"
+              />
               <span className={`text-[10px] md:text-sm lg:text-base font-semibold ${currentView === 'homes' ? 'text-black' : 'text-neutral-600 group-hover:text-black'} transition hidden md:inline`}>Homes</span>
               {currentView === 'homes' && <div className="absolute -bottom-0 left-0 w-full h-0.5 md:h-1 bg-black rounded-full"></div>}
             </Link>
@@ -120,18 +132,13 @@ const Navbar: React.FC = () => {
             >
               <div className="relative">
                 {/* Hot Air Balloon Icon */}
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="md:w-6 md:h-6">
-                  <ellipse cx="12" cy="10" rx="7" ry="8" fill="url(#balloon-gradient)" />
-                  <path d="M12 18L10 22H14L12 18Z" stroke="#8B4513" strokeWidth="1.5" fill="none" />
-                  <rect x="10" y="21" width="4" height="2" rx="0.5" fill="#8B4513" />
-                  <defs>
-                    <linearGradient id="balloon-gradient" x1="12" y1="2" x2="12" y2="18" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="#FF6B6B" />
-                      <stop offset="0.5" stopColor="#FFA500" />
-                      <stop offset="1" stopColor="#FFD700" />
-                    </linearGradient>
-                  </defs>
-                </svg>
+                {/* Hot Air Balloon Icon - 3D Style */}
+                {/* Hot Air Balloon Icon - 3D Style */}
+                <img
+                  src="/icons/balloon-3d.png"
+                  alt="Experiences"
+                  className="w-5 h-5 md:w-8 md:h-8 object-contain"
+                />
                 {/* NEW Badge */}
                 <div className="absolute -top-1 -right-2 bg-[#4A5568] text-white text-[6px] md:text-[8px] font-bold px-1 md:px-1.5 py-0.5 rounded-full">NEW</div>
               </div>
@@ -146,13 +153,13 @@ const Navbar: React.FC = () => {
             >
               <div className="relative">
                 {/* Service Bell Icon */}
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="md:w-6 md:h-6">
-                  <path d="M12 3C12 3 8 3 8 7C8 11 5 12 5 15H19C19 12 16 11 16 7C16 3 12 3 12 3Z" fill="#757575" />
-                  <ellipse cx="12" cy="15" rx="7" ry="1" fill="#9E9E9E" />
-                  <rect x="11" y="1" width="2" height="3" rx="1" fill="#FFD700" />
-                  <circle cx="12" cy="1.5" r="1" fill="#FFC107" />
-                  <line x1="4" y1="18" x2="20" y2="18" stroke="#424242" strokeWidth="2" strokeLinecap="round" />
-                </svg>
+                {/* Service Bell Icon - 3D Style */}
+                {/* Service Bell Icon - 3D Style */}
+                <img
+                  src="/icons/bell-3d.png"
+                  alt="Services"
+                  className="w-5 h-5 md:w-8 md:h-8 object-contain"
+                />
                 {/* NEW Badge */}
                 <div className="absolute -top-1 -right-2 bg-[#4A5568] text-white text-[6px] md:text-[8px] font-bold px-1 md:px-1.5 py-0.5 rounded-full">NEW</div>
               </div>
@@ -164,12 +171,89 @@ const Navbar: React.FC = () => {
           {/* Right: User Actions */}
           <div className="flex flex-row items-center gap-1 md:gap-3 shrink-0">
             <div className="text-sm font-semibold p-2 md:p-3 hover:bg-neutral-100 rounded-full cursor-pointer transition hidden lg:block">Become a host</div>
-            <div className="p-2 md:p-3 hover:bg-neutral-100 rounded-full cursor-pointer hidden sm:block">
-              <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm0 1.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13zM6 6.5a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0zm0 3a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0z" /></svg>
-            </div>
-            <div className="p-1 px-2 border border-neutral-200 flex flex-row items-center gap-1 md:gap-3 rounded-full cursor-pointer hover:shadow-md transition bg-white">
-              <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4" fill="none" stroke="currentColor" strokeWidth="3"><path d="M2 16h28M2 24h28M2 8h28" /></svg>
-              <div className="h-6 w-6 md:h-8 md:w-8 bg-neutral-500 rounded-full flex items-center justify-center text-white text-[8px] md:text-[10px] font-bold">A</div>
+            <div className="relative">
+              <div
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-1 px-2 border border-neutral-200 flex flex-row items-center gap-1 md:gap-3 rounded-full cursor-pointer hover:shadow-md transition bg-white"
+              >
+                <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4" fill="none" stroke="currentColor" strokeWidth="3"><path d="M2 16h28M2 24h28M2 8h28" /></svg>
+                {user ? (
+                  <div className="h-6 w-6 md:h-8 md:w-8 bg-black rounded-full flex items-center justify-center text-white text-[10px] md:text-[12px] font-bold overflow-hidden">
+                    {user.fullName.charAt(0).toUpperCase()}
+                  </div>
+                ) : (
+                  <div className="h-6 w-6 md:h-8 md:w-8 bg-neutral-500 rounded-full flex items-center justify-center text-white text-[8px] md:text-[10px] font-bold">P</div>
+                )}
+              </div>
+
+              {isMenuOpen && (
+                <div className="absolute right-0 top-12 w-[240px] bg-white rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.15)] border border-neutral-200 py-2 flex flex-col overflow-hidden z-[100]">
+                  {!user ? (
+                    <>
+                      <div
+                        className="font-semibold px-4 py-3 hover:bg-neutral-50 cursor-pointer transition"
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          onOpenLogin('signup');
+                        }}
+                      >
+                        Sign up
+                      </div>
+                      <div
+                        className="px-4 py-3 hover:bg-neutral-50 cursor-pointer transition"
+                        onClick={() => {
+                          setIsMenuOpen(false);
+                          onOpenLogin('login');
+                        }}
+                      >
+                        Log in
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="px-4 py-3 hover:bg-neutral-50 cursor-pointer text-neutral-600 block transition"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <div className="px-4 py-3 font-semibold border-b border-neutral-100">
+                        Hello, {user.fullName}
+                      </div>
+                      <Link
+                        to="/profile"
+                        className="px-4 py-3 hover:bg-neutral-50 cursor-pointer text-neutral-600 block transition"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Profile
+                      </Link>
+                      <div
+                        className="px-4 py-3 hover:bg-neutral-50 cursor-pointer text-neutral-600 transition"
+                        onClick={() => {
+                          setUser(null);
+                          setIsMenuOpen(false);
+                          navigate('/');
+                        }}
+                      >
+                        Log out
+                      </div>
+                    </>
+                  )}
+                  {!user && (
+                    <>
+                      <div className="h-[1px] bg-neutral-200 my-2"></div>
+                      <Link
+                        to="/help"
+                        className="px-4 py-3 hover:bg-neutral-50 cursor-pointer text-neutral-600 block transition"
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        Help Center
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

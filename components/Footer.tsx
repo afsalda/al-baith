@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
   return (
@@ -9,9 +10,9 @@ const Footer: React.FC = () => {
           <div className="space-y-4">
             <h5 className="font-bold">Support</h5>
             <ul className="space-y-2 text-sm text-gray-600">
-              <li className="hover:underline cursor-pointer">Help Center</li>
-              <li className="hover:underline cursor-pointer">AirCover</li>
-              <li className="hover:underline cursor-pointer">Anti-discrimination</li>
+              <li>
+                <Link to="/help" className="hover:underline cursor-pointer">Help Center</Link>
+              </li>
               <li className="hover:underline cursor-pointer">Disability support</li>
               <li className="hover:underline cursor-pointer">Cancellation options</li>
             </ul>
@@ -45,12 +46,12 @@ const Footer: React.FC = () => {
             </ul>
           </div>
         </div>
-        
+
         <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
           <div>© 2024 Al-Baith, Inc. · Privacy · Terms · Sitemap · Company details</div>
           <div className="flex gap-4 font-semibold text-gray-900">
-             <span>English (US)</span>
-             <span>$ USD</span>
+            <span>English (US)</span>
+            <span>$ USD</span>
           </div>
         </div>
       </div>

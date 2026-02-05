@@ -31,9 +31,9 @@ const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
     return (
         <div
             onClick={handleCardClick}
-            className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-900 shadow-sm transition-all duration-300 ease-in-out hover:y-[-4px] hover:shadow-lg cursor-pointer"
+            className="group flex flex-col h-full overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-900 shadow-sm transition-all duration-300 ease-in-out hover:y-[-4px] hover:shadow-lg cursor-pointer"
         >
-            <div className="relative h-64 w-full overflow-hidden">
+            <div className="relative h-52 w-full overflow-hidden">
                 <img
                     src={room.imageUrl}
                     alt={room.imageAlt}
@@ -46,14 +46,14 @@ const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
                 )}
             </div>
 
-            <div className="flex flex-col p-6 space-y-4">
+            <div className="flex flex-col flex-grow p-5 space-y-4">
                 <div className="space-y-2">
                     <span className="text-sm text-gray-500">{room.roomType}</span>
-                    <h3 className="text-2xl font-bold tracking-tight">{room.roomName}</h3>
+                    <h3 className="text-xl font-bold tracking-tight">{room.roomName}</h3>
 
                     <div className="flex items-center text-gray-500">
                         <MapPin className="mr-2 h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm">{room.location}</span>
+                        <span className="text-sm truncate">{room.location}</span>
                     </div>
 
                     <div className="flex items-center text-gray-500">
@@ -65,35 +65,37 @@ const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
 
                 <Separator />
 
-                <div className="space-y-3">
+                <div className="space-y-3 flex-grow">
                     <div className="flex items-center justify-between text-sm text-gray-500">
                         <span>{room.beds}</span>
                         <span>{room.size}</span>
                     </div>
 
-                    <div className="flex flex-wrap gap-3">
-                        {room.features.map((feature, index) => (
+                    <div className="flex flex-wrap gap-2">
+                        {room.features.slice(0, 4).map((feature, index) => (
                             <div
                                 key={index}
-                                className="flex items-center gap-1.5 text-sm text-gray-500"
+                                className="flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded-md"
                             >
                                 {feature.icon}
                                 <span>{feature.label}</span>
                             </div>
                         ))}
+                        {room.features.length > 4 && (
+                            <div className="text-xs text-gray-400 self-center">+{room.features.length - 4} more</div>
+                        )}
                     </div>
                 </div>
 
                 <Separator />
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pt-1">
                     <div className="flex flex-col">
-                        <span className="text-sm text-gray-500">From</span>
+                        <span className="text-xs text-gray-500">From</span>
                         <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-bold text-gray-900">
+                            <span className="text-2xl font-bold text-gray-900">
                                 {room.currency}{room.price}
                             </span>
-                            <span className="text-sm text-gray-500">/night + taxes</span>
                         </div>
                     </div>
                     <Button
@@ -101,8 +103,8 @@ const RoomCard: React.FC<{ room: Room }> = ({ room }) => {
                             e.stopPropagation();
                             navigate(`/booking/${room.id}`);
                         }}
-                        size="lg"
-                        className="bg-gold-glow text-amber-950 border-none"
+                        size="sm"
+                        className="bg-gold-glow text-amber-950 border-none font-semibold px-6"
                     >
                         Book Now
                     </Button>
