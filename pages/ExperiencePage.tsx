@@ -1,6 +1,7 @@
 import React from 'react';
 import ActivitiesGrid from '../components/ActivitiesGrid';
 import { EXPERIENCES } from '../constants';
+import { Crown, Sparkles, MapPin } from 'lucide-react';
 
 const ExperiencePage: React.FC = () => {
     return (
@@ -27,17 +28,17 @@ const ExperiencePage: React.FC = () => {
                     <h2 className="text-3xl font-bold text-center mb-12 font-serif text-amber-950">Why Choose Al-Baith</h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         <div className="text-center">
-                            <div className="text-4xl mb-4">👑</div>
+                            <div className="w-12 h-12 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center"><Crown className="w-6 h-6 text-amber-700" /></div>
                             <h3 className="text-xl font-semibold mb-2 text-amber-900">Royal Treatment</h3>
                             <p className="text-neutral-600">Every guest is royalty. Experience service that anticipates your every need.</p>
                         </div>
                         <div className="text-center">
-                            <div className="text-4xl mb-4">✨</div>
+                            <div className="w-12 h-12 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center"><Sparkles className="w-6 h-6 text-amber-700" /></div>
                             <h3 className="text-xl font-semibold mb-2 text-amber-900">Authentic Luxury</h3>
                             <p className="text-neutral-600">Interiors and experiences curated to reflect the richness of Arabic heritage.</p>
                         </div>
                         <div className="text-center">
-                            <div className="text-4xl mb-4">🕌</div>
+                            <div className="w-12 h-12 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center"><MapPin className="w-6 h-6 text-amber-700" /></div>
                             <h3 className="text-xl font-semibold mb-2 text-amber-900">Prime Location</h3>
                             <p className="text-neutral-600">Situated in the heart of the city, offering breathtaking views and easy access.</p>
                         </div>

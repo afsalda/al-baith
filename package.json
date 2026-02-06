@@ -11,10 +11,12 @@
   "dependencies": {
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
+    "@types/pg": "^8.16.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.30.0",
     "lucide-react": "^0.563.0",
+    "pg": "^8.18.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^6.30.3",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "@vercel/node": "^5.5.32",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"

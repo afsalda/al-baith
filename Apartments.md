@@ -7,7 +7,7 @@ Fully furnished apartments designed for families and long-term stays with comple
 
 ### 1 BHK Apartment
 - **Capacity**: Up to 3 Guests
-- **Pricing**: ₹3,500 per night
+- **Pricing**: ₹4,500 per night
 - **Features**: 1 Bedroom, 1 King Bed, Attached Bathroom, Kitchen, Living Area.
 ![1 BHK Apartment](/images/apartment/apt-1.jpg)
 

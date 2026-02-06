@@ -380,7 +380,7 @@ export const APARTMENT_TYPES = [
   {
     id: "1bhk",
     name: "1 BHK Apartment",
-    price: 3500,
+    price: 4500,
     guests: 3,
     size: "",
     beds: "1 King Bed",

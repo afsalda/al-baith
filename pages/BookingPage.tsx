@@ -40,6 +40,9 @@ const BookingPage: React.FC = () => {
     const originalPrice = room.price * 1.2;
 
     // Derived costs
+    const [userData, setUserData] = useState<{ fullName: string; email: string; phoneNumber: string; countryCode: string } | null>(null);
+
+    // Derived costs
     const basePrice = room.price * numberOfNights;
     const taxes = 330;
     const totalPrice = basePrice + taxes;
@@ -52,7 +55,8 @@ const BookingPage: React.FC = () => {
         setIsLoginModalOpen(true);
     };
 
-    const handleLoginSuccess = () => {
+    const handleLoginSuccess = (data: { fullName: string; email: string; phoneNumber: string; countryCode: string }) => {
+        setUserData(data);
         setIsLoginModalOpen(false);
         setIsLoggedIn(true);
     };
@@ -65,12 +69,47 @@ const BookingPage: React.FC = () => {
         }, 1500);
     };
 
-    const handleFinalConfirm = () => {
+    const handleFinalConfirm = async () => {
+        if (!userData) return;
+
         setIsProcessing(true);
-        setTimeout(() => {
-            setIsProcessing(false);
+
+        try {
+            // Check-in/out dates formatted as YYYY-MM-DD for backend
+            const formatDate = (date: Date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            const response = await fetch('/api/book-room', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: userData.fullName,
+                    email: userData.email,
+                    phone: `${userData.countryCode} ${userData.phoneNumber}`,
+                    room_type: room.roomType, // Assuming this matches DB expected values or we should use room.roomName
+                    check_in: formatDate(checkInDate),
+                    check_out: formatDate(checkOutDate)
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Booking failed');
+            }
+
             setShowSuccess(true);
-        }, 2000);
+        } catch (error: any) {
+            console.error('Booking Error:', error);
+            alert(`Booking Failed: ${error.message}`);
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     if (showSuccess) {

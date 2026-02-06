@@ -391,7 +391,7 @@ const RoomDetailsPage: React.FC = () => {
                                     <h3 className="font-semibold mb-2">House rules</h3>
                                     <ul className="space-y-2 text-gray-700">
                                         <li>Check-in: 12:00 PM</li>
-                                        <li>Checkout: 11:00 PM</li>
+                                        <li>Checkout: 11:00 AM</li>
                                         <li>No smoking</li>
                                     </ul>
                                 </div>

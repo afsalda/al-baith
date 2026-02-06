@@ -21,16 +21,6 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="space-y-4">
-            <h5 className="font-bold">Al-Baith</h5>
-            <ul className="space-y-2 text-sm text-gray-600">
-              <li className="hover:underline cursor-pointer">Newsroom</li>
-              <li className="hover:underline cursor-pointer">New features</li>
-              <li className="hover:underline cursor-pointer">Careers</li>
-              <li className="hover:underline cursor-pointer">Investors</li>
-              <li className="hover:underline cursor-pointer">Gift cards</li>
-            </ul>
-          </div>
-          <div className="space-y-4">
             <h5 className="font-bold">Social</h5>
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="hover:underline cursor-pointer">Facebook</li>
@@ -41,10 +31,9 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="mt-12 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-600">
-          <div>© 2024 Al-Baith, Inc. · Privacy · Terms · Sitemap · Company details</div>
+          <div>© 2026 Al-Baith, Inc. · Privacy · Terms · Sitemap · Company details</div>
           <div className="flex gap-4 font-semibold text-gray-900">
             <span>English (US)</span>
-            <span>$ USD</span>
           </div>
         </div>
       </div>
