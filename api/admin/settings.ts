@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const { Client } = require('pg'); // Use require for pg to avoid Vite SSR issues
-import { verifyToken, handleAuthError } from '../utils/auth.js';
+import { verifyToken, handleAuthError } from '../_lib/auth.js';
 
 export default async function handler(
     request: VercelRequest,

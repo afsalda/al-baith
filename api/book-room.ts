@@ -1,90 +1,105 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { Client } = require('pg');
+import pg from 'pg';
+const { Client } = pg;
 
 export default async function handler(
-    request: VercelRequest,
-    response: VercelResponse
+    req: VercelRequest,
+    res: VercelResponse
 ) {
     // Set CORS headers
-    response.setHeader('Access-Control-Allow-Credentials', 'true');
-    response.setHeader('Access-Control-Allow-Origin', '*');
-    response.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-    response.setHeader(
-        'Access-Control-Allow-Headers',
-        'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-    );
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', '*');
 
-    if (request.method === 'OPTIONS') {
-        response.status(200).end();
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
         return;
     }
 
-    if (request.method !== 'POST') {
-        return response.status(405).json({ error: 'Method not allowed' });
+    if (req.method !== 'POST') {
+        return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { name, phone, email, room_type, check_in, check_out } = request.body;
-    console.log('Received booking request:', { name, room_type, check_in, check_out });
+    const { name, phone, email, room_type, check_in, check_out } = req.body;
 
     if (!name || !phone || !email || !room_type || !check_in || !check_out) {
-        console.error('Missing required fields');
-        return response.status(400).json({ error: 'Missing required fields' });
+        return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    // Use connection string for database
-    const connectionString = process.env.DATABASE_URL;
-
-    if (!connectionString) {
-        console.error('DATABASE_URL is not defined in process.env');
-        return response.status(500).json({ error: 'Server configuration error: DATABASE_URL missing' });
-    }
-
-    const client = new Client({
-        connectionString,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    });
+    const connectionString = "postgresql://neondb_owner:npg_1jGmLdRfwl8X@ep-flat-shape-aib20yxl-pooler.c-4.us-east-1.aws.neon.tech/neondb?connect_timeout=15&sslmode=require";
+    const client = new Client({ connectionString });
 
     try {
         await client.connect();
-        console.log('Connected to database successfully');
+        await client.query('BEGIN');
 
-        // 1. Insert customer and get ID
-        const insertCustomerQuery = `
-      INSERT INTO customers (name, phone, email) 
-      VALUES ($1, $2, $3) 
-      RETURNING id
-    `;
-        const customerResult = await client.query(insertCustomerQuery, [name, phone, email]);
-        const customerId = customerResult.rows[0].id;
+        // 1. Check if user exists
+        let userId;
+        const userRes = await client.query('SELECT id FROM users WHERE email = $1', [email]);
 
-        // 2. Find room_id from room_type
-        const findRoomQuery = `SELECT id FROM rooms WHERE room_type = $1`;
-        const roomResult = await client.query(findRoomQuery, [room_type]);
-
-        if (roomResult.rows.length === 0) {
-            throw new Error(`Room type '${room_type}' not found`);
+        if (userRes.rows.length > 0) {
+            userId = userRes.rows[0].id;
+        } else {
+            const newUserRes = await client.query(
+                `INSERT INTO users (id, name, email, password, "role", "createdAt", "updatedAt") 
+                 VALUES (gen_random_uuid()::text, $1, $2, $3, 'CUSTOMER'::"Role", NOW(), NOW()) 
+                 RETURNING id`,
+                [name, email, 'guest-pass']
+            );
+            userId = newUserRes.rows[0].id;
         }
-        const roomId = roomResult.rows[0].id;
 
-        // 3. Insert booking
-        const insertBookingQuery = `
-      INSERT INTO bookings (customer_id, room_id, check_in, check_out, status, created_at)
-      VALUES ($1, $2, $3, $4, 'pending', CURRENT_TIMESTAMP)
-    `;
-        await client.query(insertBookingQuery, [customerId, roomId, check_in, check_out]);
+        // 2. Find the room
+        const roomRes = await client.query('SELECT id, price FROM rooms WHERE "roomType" = $1 LIMIT 1', [room_type]);
+        if (roomRes.rows.length === 0) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: `Room type '${room_type}' not found.` });
+        }
+        const roomId = roomRes.rows[0].id;
+        const price = roomRes.rows[0].price;
 
+        // 3. Create the booking
+        const bookingRes = await client.query(
+            `INSERT INTO bookings (id, "userId", "roomId", "checkIn", "checkOut", "totalAmount", "status", "createdAt", "updatedAt") 
+             VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, 'CONFIRMED'::"BookingStatus", NOW(), NOW()) 
+             RETURNING id`,
+            [userId, roomId, new Date(check_in), new Date(check_out), price]
+        );
+        const bookingId = bookingRes.rows[0].id;
+
+        // 4. Record availability
+        let curr = new Date(check_in);
+        const end = new Date(check_out);
+        while (curr < end) {
+            await client.query(
+                `INSERT INTO room_availability (id, "roomId", "date", "isBooked", "bookingId") 
+                 VALUES (gen_random_uuid()::text, $1, $2, true, $3)
+                 ON CONFLICT ("roomId", "date") DO UPDATE SET "isBooked" = true, "bookingId" = $3`,
+                [roomId, new Date(curr), bookingId]
+            );
+            curr.setDate(curr.getDate() + 1);
+        }
+
+        await client.query('COMMIT');
         await client.end();
 
-        return response.status(200).json({ message: 'Booking successful' });
+        return res.status(200).json({
+            success: true,
+            message: 'Booking completed successfully',
+            bookingId
+        });
+
     } catch (error: any) {
-        console.error('Database error:', error);
-        try {
-            await client.end();
-        } catch (e) {
-            // ignore disconnect error
+        if (client) {
+            await client.query('ROLLBACK').catch(() => { });
+            await client.end().catch(() => { });
         }
-        return response.status(500).json({ error: 'Internal server error', details: error.message });
+        console.error('DATABASE_ERROR_DETAILED:', error);
+        return res.status(500).json({
+            error: 'Database error',
+            details: error.message,
+            code: error.code
+        });
     }
 }

@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/client": "^7.3.0",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@types/jsonwebtoken": "^9.0.10",
@@ -28,6 +30,7 @@
     "@types/node": "^22.14.0",
     "@vercel/node": "^5.5.32",
     "@vitejs/plugin-react": "^5.0.0",
+    "prisma": "^7.3.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.0"
   }

@@ -1,83 +1,81 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Client } from 'pg';
+import pg from 'pg';
+const { Client } = pg;
 
 export default async function handler(
-    request: VercelRequest,
-    response: VercelResponse
+    req: VercelRequest,
+    res: VercelResponse
 ) {
-    const connectionString = process.env.DATABASE_URL;
-    if (!connectionString) {
-        return response.status(500).json({ error: 'DATABASE_URL is not defined' });
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+
+    if (req.method === 'OPTIONS') {
+        res.status(200).end();
+        return;
     }
 
-    const client = new Client({
-        connectionString,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    });
+    const connectionString = "postgresql://neondb_owner:npg_1jGmLdRfwl8X@ep-flat-shape-aib20yxl-pooler.c-4.us-east-1.aws.neon.tech/neondb?connect_timeout=15&sslmode=require";
+    const client = new Client({ connectionString });
 
     try {
         await client.connect();
 
-        // 1. Create Tables if they don't exist
+        console.log('Seed: Starting database initialization...');
+
+        // 1. Seed Admin User
         await client.query(`
-      CREATE TABLE IF NOT EXISTS rooms (
-        id SERIAL PRIMARY KEY,
-        room_type VARCHAR(50) NOT NULL UNIQUE,
-        price DECIMAL(10, 2) NOT NULL,
-        description TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+            INSERT INTO users (id, name, email, password, "role", "createdAt", "updatedAt")
+            VALUES (gen_random_uuid()::text, 'System Admin', 'admin@al-baith.com', 'admin-pass', 'ADMIN'::"Role", NOW(), NOW())
+            ON CONFLICT (email) DO NOTHING
+        `);
 
-      CREATE TABLE IF NOT EXISTS customers (
-        id SERIAL PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        email VARCHAR(100) NOT NULL,
-        phone VARCHAR(20) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+        const adminRes = await client.query("SELECT id FROM users WHERE \"role\" = 'ADMIN'::\"Role\" LIMIT 1");
+        const adminId = adminRes.rows[0].id;
 
-      CREATE TABLE IF NOT EXISTS bookings (
-        id SERIAL PRIMARY KEY,
-        customer_id INTEGER REFERENCES customers(id),
-        room_id INTEGER REFERENCES rooms(id),
-        check_in DATE NOT NULL,
-        check_out DATE NOT NULL,
-        status VARCHAR(20) DEFAULT 'confirmed',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+        // 2. Seed Hotel (Check existence first to avoid ON CONFLICT error on non-unique name)
+        const hotelCheck = await client.query("SELECT id FROM hotels LIMIT 1");
+        let hotelId;
+        if (hotelCheck.rows.length === 0) {
+            const newHotel = await client.query(`
+                INSERT INTO hotels (id, name, address, city, "ownerId", "createdAt", "updatedAt")
+                VALUES (gen_random_uuid()::text, 'Al-Baith Executive', '123 Luxury Road', 'New Delhi', $1, NOW(), NOW())
+                RETURNING id
+            `, [adminId]);
+            hotelId = newHotel.rows[0].id;
+        } else {
+            hotelId = hotelCheck.rows[0].id;
+        }
 
-        // 2. Seed Rooms
-        const rooms = [
-            { type: 'Suite Room', price: 2500 },
-            { type: 'Deluxe', price: 1800 },
-            { type: 'Standard', price: 1500 },
-            { type: 'Apartment', price: 3500 },
-            // Add variations just in case
-            { type: 'Deluxe Room', price: 1800 },
-            { type: 'Standard Room', price: 1500 }
+        // 3. Seed Rooms (Check existence by roomType)
+        const roomTypes = [
+            { type: 'Standard Room', price: 99.00, cap: 2 },
+            { type: 'Deluxe Room', price: 144.00, cap: 2 },
+            { type: 'Executive Suite', price: 249.00, cap: 3 },
+            { type: 'Family Suite', price: 349.00, cap: 5 }
         ];
 
-        let insertedCount = 0;
-        for (const room of rooms) {
-            const check = await client.query('SELECT id FROM rooms WHERE room_type = $1', [room.type]);
-            if (check.rows.length === 0) {
-                await client.query('INSERT INTO rooms (room_type, price) VALUES ($1, $2)', [room.type, room.price]);
-                insertedCount++;
+        for (const r of roomTypes) {
+            const roomCheck = await client.query('SELECT id FROM rooms WHERE "roomType" = $1', [r.type]);
+            if (roomCheck.rows.length === 0) {
+                await client.query(`
+                    INSERT INTO rooms (id, "hotelId", "roomType", price, capacity, "createdAt", "updatedAt")
+                    VALUES (gen_random_uuid()::text, $1, $2, $3, $4, NOW(), NOW())
+                `, [hotelId, r.type, r.price, r.cap]);
             }
         }
 
         await client.end();
-
-        return response.status(200).json({
-            message: 'Database initialized successfully',
-            tablesCreated: true,
-            roomsSeeded: insertedCount
+        return res.status(200).json({
+            success: true,
+            message: 'Database initialization successful. Using existence checks instead of non-unique ON CONFLICT clauses.'
         });
 
     } catch (error: any) {
-        console.error('Seed error:', error);
-        try { await client.end(); } catch (e) { }
-        return response.status(500).json({ error: 'Migration failed', details: error.message });
+        if (client) await client.end().catch(() => { });
+        console.error('SEED_ERROR_DETAILED:', error);
+        return res.status(500).json({ error: error.message });
     }
 }
