@@ -4,7 +4,15 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
+
+  // Inject env vars into process.env so they are available in ssrLoadModule context
+  // This is critical for files expecting process.env.DATABASE_URL etc.
+  Object.assign(process.env, env);
+
   return {
+    ssr: {
+      external: ['pg'],
+    },
     server: {
       port: 3000,
       host: '0.0.0.0',
@@ -15,103 +23,165 @@ export default defineConfig(({ mode }) => {
         name: 'configure-server',
         configureServer(server) {
           server.middlewares.use(async (req, res, next) => {
-            if (req.url === '/api/book-room' && req.method === 'POST') {
-              console.log('[Middleware] POST /api/book-room received');
-              const chunks = [];
-              req.on('data', chunk => chunks.push(chunk));
-              req.on('end', async () => {
-                try {
-                  const bodyRaw = Buffer.concat(chunks).toString();
-                  console.log('[Middleware] Body:', bodyRaw);
-                  const body = JSON.parse(bodyRaw);
-
-                  // Dynamic require for CJS compatibility
-                  const { createRequire } = await import('module');
-                  const require = createRequire(import.meta.url);
-                  const { Client } = require('pg');
-
-                  const client = new Client({ connectionString: env.DATABASE_URL, ssl: false });
-                  await client.connect();
-                  console.log('[Middleware] DB Connected');
-
-                  // 1. Insert customer
-                  const insertCustomerQuery = `INSERT INTO customers (name, phone, email) VALUES ($1, $2, $3) RETURNING id`;
-                  const customerResult = await client.query(insertCustomerQuery, [body.name, body.phone, body.email]);
-                  const customerId = customerResult.rows[0].id;
-
-                  // 2. Find room
-                  const findRoomQuery = `SELECT id FROM rooms WHERE room_type = $1`;
-                  const roomResult = await client.query(findRoomQuery, [body.room_type]);
-                  if (roomResult.rows.length === 0) throw new Error(`Room '${body.room_type}' not found`);
-
-                  // 3. Insert booking
-                  const insertBookingQuery = `INSERT INTO bookings (customer_id, room_id, check_in, check_out) VALUES ($1, $2, $3, $4)`;
-                  await client.query(insertBookingQuery, [customerId, roomResult.rows[0].id, body.check_in, body.check_out]);
-
-                  await client.end();
-                  console.log('[Middleware] Booking success');
-                  res.statusCode = 200;
-                  res.setHeader('Content-Type', 'application/json');
-                  res.end(JSON.stringify({ message: 'Booking successful' }));
-                } catch (e) {
-                  console.error('[Middleware] Error:', e);
-                  res.statusCode = 500;
-                  res.setHeader('Content-Type', 'application/json');
-                  res.end(JSON.stringify({ error: e.message }));
-                }
-              });
-              return;
-            }
-
-            if (req.url === '/api/get-bookings' && req.method === 'GET') {
-              console.log('[Middleware] GET /api/get-bookings received');
+            if (req.url?.startsWith('/api/')) {
               try {
-                const { createRequire } = await import('module');
-                const require = createRequire(import.meta.url);
-                const { Client } = require('pg');
+                // 1. Parse Body
+                let body: any = {};
+                if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method || '')) {
+                  const buffers = [];
+                  for await (const chunk of req) {
+                    buffers.push(chunk);
+                  }
+                  const data = Buffer.concat(buffers).toString();
+                  if (data) {
+                    try {
+                      body = JSON.parse(data);
+                    } catch (e) {
+                      console.warn('Failed to parse body JSON', e);
+                    }
+                  }
+                }
 
-                const client = new Client({ connectionString: env.DATABASE_URL, ssl: false });
-                await client.connect();
-                console.log('[Middleware] DB Connected for GET');
+                // 2. Mock Vercel Request/Response
+                const vercelReq: any = req;
+                vercelReq.body = body;
+                vercelReq.query = {};
 
-                const query = `
-                  SELECT 
-                    b.id, c.name as "customerName", c.email, c.phone, 
-                    b.check_in as "checkIn", b.check_out as "checkOut", 
-                    r.room_type as "roomType", r.id as "roomId", r.price
-                  FROM bookings b
-                  JOIN customers c ON b.customer_id = c.id
-                  JOIN rooms r ON b.room_id = r.id
-                  ORDER BY b.id DESC
-                `;
-                const result = await client.query(query);
-                const bookings = result.rows.map(row => ({
-                  id: row.id.toString(),
-                  customerName: row.customerName,
-                  email: row.email,
-                  phone: row.phone,
-                  checkIn: row.checkIn,
-                  checkOut: row.checkOut,
-                  roomType: row.roomType,
-                  roomId: row.roomId ? row.roomId.toString() : 'unknown',
-                  guests: 2,
-                  totalAmount: row.price ? parseFloat(row.price) : 0,
-                  paymentStatus: 'pending',
-                  bookingStatus: 'confirmed',
-                  createdAt: new Date().toISOString()
-                }));
-                await client.end();
-                console.log(`[Middleware] Fetched ${bookings.length} bookings`);
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify(bookings));
-              } catch (e) {
-                console.error('[Middleware] GET Error:', e);
+                // Parse query params manually
+                const urlParts = req.url.split('?');
+                if (urlParts.length > 1) {
+                  const searchParams = new URLSearchParams(urlParts[1]);
+                  searchParams.forEach((value, key) => {
+                    vercelReq.query[key] = value;
+                  });
+                }
+                // Strip query from URL for file matching
+                const pathname = urlParts[0];
+
+                const vercelRes: any = res;
+                vercelRes.status = (statusCode: number) => {
+                  res.statusCode = statusCode;
+                  return vercelRes;
+                };
+                vercelRes.json = (data: any) => {
+                  res.setHeader('Content-Type', 'application/json');
+                  res.end(JSON.stringify(data));
+                  return vercelRes;
+                };
+
+                // 3. Match Route to File
+                // /api/admin/login -> api/admin/login.ts
+                // /api/admin/rooms -> api/admin/rooms/index.ts or api/admin/rooms.ts
+                // /api/admin/rooms?id=1 -> api/admin/rooms/[id].ts (if checking ID) OR api/admin/rooms.ts
+
+                let filePath = '';
+                const apiPath = pathname.replace('/api/', '');
+
+                // Simple router logic matching the file structure I created
+                if (apiPath === 'book-room') filePath = './api/book-room.ts';
+                else if (apiPath === 'get-bookings') filePath = './api/get-bookings.ts';
+                else if (apiPath === 'admin/login') filePath = './api/admin/login.ts';
+                else if (apiPath === 'admin/rooms') filePath = './api/admin/rooms/index.ts';
+                else if (apiPath === 'admin/bookings') filePath = './api/admin/bookings/index.ts';
+                else if (apiPath === 'admin/settings') filePath = './api/admin/settings.ts';
+                else if (pathname.match(/\/api\/admin\/rooms\/\d+/)) {
+                  // actually my code uses query param ?id=... but requests to /api/admin/rooms
+                  // Wait, my frontend: `/api/admin/rooms?id=${id}` (DELETE/PUT) -> Hits /api/admin/rooms
+                  // So it should map to index.ts ??
+                  // No, my implementation plan:
+                  // `api/admin/rooms/[id].ts` handles UPDATE/DELETE with id query? 
+                  // No, usually [id] handles /rooms/123.
+                  // If I used query param `?id=...` in `AdminRoomsPage.tsx`, the URL is `/api/admin/rooms?id=1`.
+                  // This means it hits `api/admin/rooms/index.ts` logically if I don't handle it.
+                  // BUT `api/admin/rooms/[id].ts` is waiting for what? 
+                  // Let's re-read the code I wrote for `api/admin/rooms/[id].ts`.
+                  // It gets `const { id } = request.query`.
+                  // If I request `/api/admin/rooms?id=1`, that goes to `index.ts` normally unless I route it.
+                  // However, `index.ts` implementation:
+                  // GET (list), POST (create).
+                  // It does NOT handle PUT/DELETE.
+                  // So I MUST route `/api/admin/rooms` with `?id=` to `[id].ts`?
+                  // OR I made a mistake in the frontend to call `/api/admin/rooms?id=x` expecting it to go to `[id].ts`.
+                  // Vercel file-based routing:
+                  // `/api/admin/rooms` -> `api/admin/rooms/index.ts`
+                  // `/api/admin/rooms/123` -> `api/admin/rooms/[id].ts`.
+
+                  // Frontend `AdminRoomsPage.tsx`:
+                  // `fetch(\`/api/admin/rooms?id=${id}\`, ...)`
+                  // This hits `.../rooms` path. It goes to `index.ts`.
+                  // `index.ts` (as I wrote it) ONLY handles GET/POST.
+                  // So PUT/DELETE will fail with 405 Method Not Allowed (if I implemented 405) or just run GET logic?
+                  // Wait, `index.ts` has `if (GET) ... if (POST) ... return 405`.
+
+                  // Implementation of `[id].ts`:
+                  // `export default async function handler...` handles PUT/DELETE.
+
+                  // CORRECTION: The frontend should call `/api/admin/rooms/${id}` NOT `?id=${id}` if I want to hit `[id].ts`.
+                  // OR I should merge the logic into `index.ts`.
+                  // Merging is easier for this custom router.
+                  // But `[id].ts` exists.
+                  // Let's fix the frontend to use path params `/api/admin/rooms/${id}`.
+                  // AND map it here: `if path matches .../rooms/123 -> .../rooms/[id].ts`.
+
+                  // BUT for now, let's fix the ROUTER in vite logic to try `[id].ts` if exact match implies it.
+                  // No, cleaner to fix frontend to match Vercel standard: `/api/user/123`.
+
+                  // Let's support both or just fix frontend.
+                  // I will fix Frontend `AdminRoomsPage` and `AdminBookingsPage` to use `/api/admin/rooms/${id}`.
+                  // And here I will map `/api/admin/rooms/*` to `[id].ts`.
+                }
+
+                // Generic Router Attempt
+                if (!filePath) {
+                  // Try exact match
+                  // e.g. /api/admin/rooms -> ./api/admin/rooms.ts (not exists) OR ./api/admin/rooms/index.ts
+                  const potentialFiles = [
+                    `./api/${apiPath}.ts`,
+                    `./api/${apiPath}/index.ts`,
+                    `./api/${apiPath}.js`,
+                    `./api/${apiPath}/index.js`
+                  ];
+
+                  // If we resolve one, good.
+                  // But we can't easily check file existence in async middleware efficiently without fs.
+                  // I will trust my mapping for now or use a try/catch loader.
+
+                  // Let's use specific mapping for sure.
+                  // Handling the routes I know I created.
+
+                  if (apiPath === 'admin/rooms') filePath = './api/admin/rooms/index.ts';
+                  else if (apiPath.startsWith('admin/rooms/')) {
+                    filePath = './api/admin/rooms/[id].ts';
+                    const id = apiPath.split('/').pop();
+                    if (id) vercelReq.query.id = id;
+                  }
+                  else if (apiPath === 'admin/bookings') filePath = './api/admin/bookings/index.ts';
+                  else if (apiPath.startsWith('admin/bookings/')) {
+                    filePath = './api/admin/bookings/[id].ts';
+                    const id = apiPath.split('/').pop();
+                    if (id) vercelReq.query.id = id;
+                  }
+                  else if (apiPath === 'admin/settings') filePath = './api/admin/settings.ts';
+                  // keep existing
+                  else if (apiPath === 'book-room') filePath = './api/book-room.ts';
+                  else if (apiPath === 'get-bookings') filePath = './api/get-bookings.ts';
+                }
+
+                if (filePath) {
+                  console.log(`[Vite API] Proxying ${req.method} ${req.url} -> ${filePath}`);
+                  const module = await server.ssrLoadModule(filePath);
+                  await module.default(vercelReq, vercelRes);
+                  return;
+                } else {
+                  console.warn(`[Vite API] No route found for ${pathname}`);
+                }
+
+              } catch (e: any) {
+                console.error('[Vite API] Error:', e);
                 res.statusCode = 500;
-                res.setHeader('Content-Type', 'application/json');
                 res.end(JSON.stringify({ error: e.message }));
+                return;
               }
-              return;
             }
             next();
           });

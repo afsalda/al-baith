@@ -9,8 +9,9 @@ interface AdminLoginPageProps {
 
 const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onLogin }) => {
     const navigate = useNavigate();
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    // Pre-fill for easier testing/demo
+    const [email, setEmail] = useState('admin@al-baith.com');
+    const [password, setPassword] = useState('admin');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -20,14 +21,32 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onLogin }) => {
         setError('');
         setIsLoading(true);
 
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        try {
+            const response = await fetch('/api/admin/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: email.trim(), password: password.trim() }),
+            });
 
-        if (email === ADMIN_USER.email && password === ADMIN_USER.password) {
-            onLogin({ name: ADMIN_USER.name, email: ADMIN_USER.email });
+            const data = await response.json();
+
+            if (!response.ok) {
+                console.error('Login failed:', data); // Log failure to console for debugging
+                throw new Error(data.error || 'Login failed');
+            }
+
+            // Save token and user info
+            localStorage.setItem('adminToken', data.token);
+            localStorage.setItem('adminUser', JSON.stringify(data.user));
+
+            onLogin({ name: data.user.name, email: data.user.email });
             navigate('/admin/dashboard');
-        } else {
-            setError('Invalid email or password. Please try again.');
+
+        } catch (err: any) {
+            setError(err.message || 'An error occurred. Please try again.');
+        } finally {
             setIsLoading(false);
         }
     };

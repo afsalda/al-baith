@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Client } from 'pg';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { Client } = require('pg');
 
 export default async function handler(
     request: VercelRequest,
@@ -44,6 +46,8 @@ export default async function handler(
         c.phone, 
         b.check_in as "checkIn", 
         b.check_out as "checkOut", 
+        b.status,
+        b.created_at as "createdAt",
         r.room_type as "roomType",
         r.id as "roomId",
         r.price
@@ -67,9 +71,9 @@ export default async function handler(
             roomId: row.roomId ? row.roomId.toString() : 'unknown',
             guests: 2, // Default
             totalAmount: row.price || 0, // Default to room price per night (simplified)
-            paymentStatus: 'pending',
-            bookingStatus: 'confirmed',
-            createdAt: new Date().toISOString() // Mock
+            paymentStatus: row.paymentStatus || 'pending', // Assume paymentStatus added later or use mock for now
+            bookingStatus: row.status || 'pending', // Use real status
+            createdAt: row.createdAt || new Date().toISOString()
         }));
 
         await client.end();

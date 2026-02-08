@@ -65,17 +65,17 @@ const CancellationPolicyPage: React.FC = () => {
                     </h2>
                     <p className="text-neutral-600 mb-8">To request a cancellation or for any questions, please contact our support team:</p>
                     <div className="space-y-4">
-                        <div className="flex justify-between items-center pb-3 border-b border-neutral-200">
-                            <span className="text-neutral-500 font-medium">Phone</span>
-                            <span className="text-neutral-900">____________________</span>
-                        </div>
-                        <div className="flex justify-between items-center pb-3 border-b border-neutral-200">
-                            <span className="text-neutral-500 font-medium">WhatsApp</span>
-                            <span className="text-neutral-900">____________________</span>
+                        <div className="flex flex-col gap-2 pb-3 border-b border-neutral-200">
+                            <span className="text-neutral-500 font-medium">Call / WhatsApp</span>
+                            <div className="flex flex-col gap-1">
+                                <a href="https://wa.me/916238304411" target="_blank" rel="noopener noreferrer" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">6238-304411</a>
+                                <a href="https://wa.me/918848805197" target="_blank" rel="noopener noreferrer" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">8848805197</a>
+                                <a href="https://wa.me/919447290936" target="_blank" rel="noopener noreferrer" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">9447290936</a>
+                            </div>
                         </div>
                         <div className="flex justify-between items-center pb-3 border-b border-neutral-200">
                             <span className="text-neutral-500 font-medium">Email</span>
-                            <span className="text-neutral-900">____________________</span>
+                            <a href="mailto:contact@al-baith.com" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">contact@al-baith.com</a>
                         </div>
                     </div>
                 </section>

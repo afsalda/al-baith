@@ -16,7 +16,13 @@ import HelpCenterPage from './pages/HelpCenterPage';
 import CancellationPolicyPage from './pages/CancellationPolicyPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminRoomsPage from './pages/admin/AdminRoomsPage';
+import AdminBookingsPage from './pages/admin/AdminBookingsPage';
+import AdminSettingsPage from './pages/admin/AdminSettingsPage';
+import AdminLayout from './components/admin/AdminLayout';
+import ProtectedRoute from './components/admin/ProtectedRoute';
 import LoginModal from './components/LoginModal';
+import { Navigate } from 'react-router-dom';
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -46,12 +52,26 @@ const App: React.FC = () => {
   // Check if current route is an admin route
   const isAdminRoute = location.pathname.startsWith('/admin');
 
-  // Admin routes render without Navbar/Footer
+  // Load admin/protected route components dynamically or statically
+  // Note: For simplicity in this file, we are using the static imports.
+
   if (isAdminRoute) {
     return (
       <Routes>
-        <Route path="/admin" element={<AdminLoginPage onLogin={handleAdminLogin} />} />
-        <Route path="/admin/dashboard" element={<AdminDashboardPage admin={admin} onLogout={handleAdminLogout} />} />
+        <Route path="/admin/login" element={<AdminLoginPage onLogin={handleAdminLogin} />} />
+
+        {/* Protected Admin Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/rooms" element={<AdminRoomsPage />} />
+            <Route path="/admin/bookings" element={<AdminBookingsPage />} />
+            <Route path="/admin/settings" element={<AdminSettingsPage />} />
+          </Route>
+        </Route>
+
+        {/* Redirect /admin to /admin/dashboard (which redirects to login if not auth) */}
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
       </Routes>
     );
   }

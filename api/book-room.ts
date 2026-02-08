@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { Client } from 'pg';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const { Client } = require('pg');
 
 export default async function handler(
     request: VercelRequest,
@@ -68,8 +70,8 @@ export default async function handler(
 
         // 3. Insert booking
         const insertBookingQuery = `
-      INSERT INTO bookings (customer_id, room_id, check_in, check_out)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO bookings (customer_id, room_id, check_in, check_out, status, created_at)
+      VALUES ($1, $2, $3, $4, 'pending', CURRENT_TIMESTAMP)
     `;
         await client.query(insertBookingQuery, [customerId, roomId, check_in, check_out]);
 
