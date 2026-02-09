@@ -1,7 +1,6 @@
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { Client } = require('pg');
+import { insforge } from '../../../lib/insforge';
 import { verifyToken, handleAuthError } from '../../_lib/auth.js';
 
 export default async function handler(
@@ -28,35 +27,55 @@ export default async function handler(
         return handleAuthError(response);
     }
 
-    const client = new Client({
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    });
+    // Check InsForge client
+    if (!insforge) {
+        console.error('InsForge client not initialized');
+        return response.status(500).json({ error: 'Database configuration error' });
+    }
 
     try {
-        await client.connect();
-
         if (request.method === 'GET') {
-            // Join bookings with customers and rooms to get full details
-            const query = `
-                SELECT 
-                    b.id,
-                    c.name as "customerName",
-                    c.email,
-                    c.phone,
-                    b.check_in as "checkIn",
-                    b.check_out as "checkOut",
-                    r.room_type as "roomType",
-                    b.room_id as "roomId",
-                    b.status as "bookingStatus",
-                    b.created_at as "createdAt"
-                FROM bookings b
-                JOIN customers c ON b.customer_id = c.id
-                JOIN rooms r ON b.room_id = r.id
-                ORDER BY b.created_at DESC
-            `;
-            const result = await client.query(query);
-            return response.status(200).json(result.rows);
+            const { data: bookings, error } = await insforge.database
+                .from('bookings')
+                .select(`
+                    id,
+                    checkIn,
+                    checkOut,
+                    status,
+                    bookingTime,
+                    createdAt,
+                    user:users (
+                        name,
+                        email,
+                        phone
+                    ),
+                     room:rooms (
+                        roomType
+                    )
+                `)
+                .order('createdAt', { ascending: false });
+
+            if (error) {
+                console.error('Fetch Bookings Error:', error);
+                throw error;
+            }
+
+            // Transform data for frontend compatibility
+            // Frontend expects: { id, customerName, email, phone, checkIn, checkOut, roomType, bookingStatus, createdAt }
+            const transformedBookings = bookings.map((b: any) => ({
+                id: b.id,
+                customerName: b.user?.name || 'Unknown',
+                email: b.user?.email || 'N/A',
+                phone: b.user?.phone || 'N/A',
+                checkIn: b.checkIn,
+                checkOut: b.checkOut,
+                roomType: b.room?.roomType || 'Unknown Room',
+                bookingTime: b.bookingTime || b.createdAt,
+                bookingStatus: b.status || 'pending', // Map 'status' to 'bookingStatus'
+                createdAt: b.createdAt
+            }));
+
+            return response.status(200).json(transformedBookings);
         }
 
         return response.status(405).json({ error: 'Method not allowed' });
@@ -64,7 +83,5 @@ export default async function handler(
     } catch (error: any) {
         console.error('Bookings API Error:', error);
         return response.status(500).json({ error: 'Internal server error', details: error.message });
-    } finally {
-        await client.end();
     }
 }

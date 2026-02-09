@@ -10,6 +10,7 @@ interface Booking {
     checkOut: string;
     roomType: string;
     bookingStatus: 'confirmed' | 'pending' | 'cancelled';
+    bookingTime: string;
     createdAt: string;
 }
 
@@ -80,7 +81,8 @@ const AdminBookingsPage: React.FC = () => {
     };
 
     const getStatusColor = (status: string) => {
-        switch (status) {
+        const s = status.toLowerCase();
+        switch (s) {
             case 'confirmed': return 'bg-green-100 text-green-700 border-green-200';
             case 'pending': return 'bg-amber-100 text-amber-700 border-amber-200';
             case 'cancelled': return 'bg-red-100 text-red-700 border-red-200';
@@ -103,6 +105,7 @@ const AdminBookingsPage: React.FC = () => {
                             <th className="p-4 font-medium">Customer</th>
                             <th className="p-4 font-medium">Room</th>
                             <th className="p-4 font-medium">Dates</th>
+                            <th className="p-4 font-medium">Booked At</th>
                             <th className="p-4 font-medium">Status</th>
                             <th className="p-4 font-medium text-right">Actions</th>
                         </tr>
@@ -119,6 +122,16 @@ const AdminBookingsPage: React.FC = () => {
                                 <td className="p-4 text-sm text-gray-600">
                                     <div>In: {new Date(booking.checkIn).toLocaleDateString()}</div>
                                     <div>Out: {new Date(booking.checkOut).toLocaleDateString()}</div>
+                                </td>
+                                <td className="p-4 text-sm text-gray-500">
+                                    {new Date(booking.bookingTime).toLocaleString('en-IN', {
+                                        day: '2-digit',
+                                        month: 'short',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    })}
                                 </td>
                                 <td className="p-4">
                                     <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(booking.bookingStatus)}`}>

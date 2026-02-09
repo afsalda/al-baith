@@ -1,7 +1,6 @@
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { Client } = require('pg');
+import { insforge } from '../../../lib/insforge';
 import { verifyToken, handleAuthError } from '../../_lib/auth.js';
 
 export default async function handler(
@@ -34,55 +33,68 @@ export default async function handler(
         return response.status(400).json({ error: 'Invalid ID' });
     }
 
-    const client = new Client({
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    });
+    // Check InsForge client
+    if (!insforge) {
+        console.error('InsForge client not initialized');
+        return response.status(500).json({ error: 'Database configuration error' });
+    }
 
     try {
-        await client.connect();
-
         if (request.method === 'PUT') {
-            const { room_type, price, description, image_url } = request.body;
+            const { room_type, price, description, image_url, capacity } = request.body;
 
-            const query = `
-                UPDATE rooms 
-                SET room_type = COALESCE($1, room_type),
-                    price = COALESCE($2, price),
-                    description = COALESCE($3, description),
-                    image_url = COALESCE($4, image_url)
-                WHERE id = $5
-                RETURNING *
-            `;
-            const result = await client.query(query, [room_type, price, description, image_url, id]);
+            // Build update object with only provided fields
+            const updates: any = {};
+            // Map incoming 'room_type' to 'roomType' column
+            if (room_type !== undefined) updates.roomType = room_type;
+            if (price !== undefined) updates.price = price;
+            if (description !== undefined) updates.description = description;
+            if (image_url !== undefined) updates.image_url = image_url;
+            if (capacity !== undefined) updates.capacity = capacity;
 
-            if (result.rows.length === 0) {
+            updates.updatedAt = new Date().toISOString();
+
+            const { data, error } = await insforge.database
+                .from('rooms')
+                .update(updates)
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Update Room Error:', error);
+                throw error;
+            }
+
+            if (!data) {
                 return response.status(404).json({ error: 'Room not found' });
             }
 
-            return response.status(200).json(result.rows[0]);
+            return response.status(200).json(data);
         }
 
         if (request.method === 'DELETE') {
-            // Check for bookings first?
-            // For now, simple delete. DB foreign key constraint might fail if there are bookings.
-            // Ideally we should soft delete or check constraints, but user asked for simple delete.
-            // If foreign key constraint exists (it does), this will fail if bookings exist.
+            const { error, data } = await insforge.database
+                .from('rooms')
+                .delete()
+                .eq('id', id)
+                .select(); // Select to check if deleted
 
-            try {
-                const query = 'DELETE FROM rooms WHERE id = $1 RETURNING *';
-                const result = await client.query(query, [id]);
-
-                if (result.rows.length === 0) {
-                    return response.status(404).json({ error: 'Room not found' });
-                }
-                return response.status(200).json({ message: 'Room deleted successfully' });
-            } catch (fkError: any) {
-                if (fkError.code === '23503') { // Foreign key violation
+            if (error) {
+                // Check for foreign key violation (usually error code 23503 in postgres)
+                if (error.code === '23503') {
                     return response.status(400).json({ error: 'Cannot delete room with existing bookings' });
                 }
-                throw fkError;
+                console.error('Delete Room Error:', error);
+                throw error;
             }
+
+            // Check if any row was returned (meaning deleted)
+            if (!data || data.length === 0) {
+                return response.status(404).json({ error: 'Room not found (or already deleted)' });
+            }
+
+            return response.status(200).json({ message: 'Room deleted successfully' });
         }
 
         return response.status(405).json({ error: 'Method not allowed' });
@@ -90,7 +102,5 @@ export default async function handler(
     } catch (error: any) {
         console.error('Room Details API Error:', error);
         return response.status(500).json({ error: 'Internal server error', details: error.message });
-    } finally {
-        await client.end();
     }
 }

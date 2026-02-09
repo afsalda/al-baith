@@ -1,7 +1,6 @@
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { Client } = require('pg'); // Use require for pg to avoid Vite SSR issues
+import { insforge } from '../../lib/insforge';
 import { verifyToken, handleAuthError } from '../_lib/auth.js';
 
 export default async function handler(
@@ -22,12 +21,6 @@ export default async function handler(
         return;
     }
 
-    // Allow public GET? Or only admin?
-    // User requirement: "Hotel Settings (CRUD)" in Admin Panel.
-    // Usually settings are needed for the frontend (Footer contact info).
-    // So GET should be public, PUT should be admin-only.
-    // Let's check token only for PUT.
-
     let user = null;
     if (request.method !== 'GET') {
         user = verifyToken(request);
@@ -36,38 +29,46 @@ export default async function handler(
         }
     }
 
-    const client = new Client({
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    });
+    // Check InsForge client
+    if (!insforge) {
+        console.error('InsForge client not initialized');
+        return response.status(500).json({ error: 'Database configuration error' });
+    }
 
     try {
-        await client.connect();
-
         if (request.method === 'GET') {
-            const result = await client.query('SELECT key, value FROM settings');
+            const { data, error } = await insforge.database
+                .from('settings')
+                .select('key, value');
+
+            if (error) throw error;
+
             // Transform array to object for easier consumption { key: value }
-            const settings = result.rows.reduce((acc: any, row: any) => {
+            const settings = (data || []).reduce((acc: any, row: any) => {
                 acc[row.key] = row.value;
                 return acc;
             }, {});
+
             return response.status(200).json(settings);
         }
 
         if (request.method === 'PUT') {
             const settings = request.body; // Expect { key: value, key2: value2 }
 
-            // We loop through keys and update them
-            const keys = Object.keys(settings);
+            // InsForge (PostgREST) supports bulk upsert
+            // Transform object to array of { key, value }
+            const updates = Object.keys(settings).map(key => ({
+                key,
+                value: settings[key],
+                updated_at: new Date().toISOString()
+            }));
 
-            for (const key of keys) {
-                // Upsert logic
-                await client.query(`
-                    INSERT INTO settings (key, value)
-                    VALUES ($1, $2)
-                    ON CONFLICT (key) 
-                    DO UPDATE SET value = $2, updated_at = CURRENT_TIMESTAMP
-                `, [key, settings[key]]);
+            if (updates.length > 0) {
+                const { error } = await insforge.database
+                    .from('settings')
+                    .upsert(updates, { onConflict: 'key' });
+
+                if (error) throw error;
             }
 
             return response.status(200).json({ message: 'Settings updated successfully' });
@@ -78,7 +79,5 @@ export default async function handler(
     } catch (error: any) {
         console.error('Settings API Error:', error);
         return response.status(500).json({ error: 'Internal server error', details: error.message });
-    } finally {
-        await client.end();
     }
 }

@@ -1,7 +1,6 @@
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { Client } = require('pg');
+import { insforge } from '../../../lib/insforge';
 import { verifyToken, handleAuthError } from '../../_lib/auth.js';
 
 export default async function handler(
@@ -34,14 +33,13 @@ export default async function handler(
         return response.status(400).json({ error: 'Invalid ID' });
     }
 
-    const client = new Client({
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    });
+    // Check InsForge client
+    if (!insforge) {
+        console.error('InsForge client not initialized');
+        return response.status(500).json({ error: 'Database configuration error' });
+    }
 
     try {
-        await client.connect();
-
         if (request.method === 'PUT') {
             const { status } = request.body;
 
@@ -49,28 +47,47 @@ export default async function handler(
                 return response.status(400).json({ error: 'Status is required' });
             }
 
-            const query = `
-                UPDATE bookings 
-                SET status = $1
-                WHERE id = $2
-                RETURNING *
-            `;
-            const result = await client.query(query, [status, id]);
+            // Map status to uppercase if needed by DB enum
+            const formattedStatus = status.toUpperCase();
 
-            if (result.rows.length === 0) {
+            const { data, error } = await insforge.database
+                .from('bookings')
+                .update({
+                    status: formattedStatus,
+                    updatedAt: new Date().toISOString()
+                })
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) {
+                console.error('Update Booking Error:', error);
+                throw error;
+            }
+
+            if (!data) {
                 return response.status(404).json({ error: 'Booking not found' });
             }
 
-            return response.status(200).json(result.rows[0]);
+            return response.status(200).json(data);
         }
 
         if (request.method === 'DELETE') {
-            const query = 'DELETE FROM bookings WHERE id = $1 RETURNING *';
-            const result = await client.query(query, [id]);
+            const { error, data } = await insforge.database
+                .from('bookings')
+                .delete()
+                .eq('id', id)
+                .select();
 
-            if (result.rows.length === 0) {
+            if (error) {
+                console.error('Delete Booking Error:', error);
+                throw error;
+            }
+
+            if (!data || data.length === 0) {
                 return response.status(404).json({ error: 'Booking not found' });
             }
+
             return response.status(200).json({ message: 'Booking deleted successfully' });
         }
 
@@ -79,7 +96,5 @@ export default async function handler(
     } catch (error: any) {
         console.error('Booking Details API Error:', error);
         return response.status(500).json({ error: 'Internal server error', details: error.message });
-    } finally {
-        await client.end();
     }
 }

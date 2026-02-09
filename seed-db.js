@@ -27,7 +27,7 @@ async function seed() {
 
     const client = new Client({
         connectionString,
-        ssl: false // Localhost usually doesn't use SSL
+        ssl: connectionString.includes('localhost') ? false : { rejectUnauthorized: false }
     });
 
     try {

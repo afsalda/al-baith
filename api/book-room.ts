@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import pg from 'pg';
-const { Client } = pg;
+import { insforge } from '../lib/insforge';
 
 export default async function handler(
     req: VercelRequest,
@@ -27,62 +26,104 @@ export default async function handler(
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const connectionString = "postgresql://neondb_owner:npg_1jGmLdRfwl8X@ep-flat-shape-aib20yxl-pooler.c-4.us-east-1.aws.neon.tech/neondb?connect_timeout=15&sslmode=require";
-    const client = new Client({ connectionString });
+    if (!insforge) {
+        console.error('InsForge client not initialized');
+        return res.status(500).json({ error: 'Database configuration error' });
+    }
 
     try {
-        await client.connect();
-        await client.query('BEGIN');
-
         // 1. Check if user exists
         let userId;
-        const userRes = await client.query('SELECT id FROM users WHERE email = $1', [email]);
+        const { data: users, error: userError } = await insforge.database
+            .from('users')
+            .select('id')
+            .eq('email', email);
 
-        if (userRes.rows.length > 0) {
-            userId = userRes.rows[0].id;
+        if (userError) throw userError;
+
+        if (users && users.length > 0) {
+            userId = users[0].id;
         } else {
-            const newUserRes = await client.query(
-                `INSERT INTO users (id, name, email, password, "role", "createdAt", "updatedAt") 
-                 VALUES (gen_random_uuid()::text, $1, $2, $3, 'CUSTOMER'::"Role", NOW(), NOW()) 
-                 RETURNING id`,
-                [name, email, 'guest-pass']
-            );
-            userId = newUserRes.rows[0].id;
+            const { data: newUser, error: createError } = await insforge.database
+                .from('users')
+                .insert([
+                    {
+                        name,
+                        email,
+                        phone,
+                        password: 'guest-pass',
+                        role: 'CUSTOMER',
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    }
+                ])
+                .select('id')
+                .single();
+
+            if (createError) throw createError;
+            userId = newUser.id;
         }
 
         // 2. Find the room
-        const roomRes = await client.query('SELECT id, price FROM rooms WHERE "roomType" = $1 LIMIT 1', [room_type]);
-        if (roomRes.rows.length === 0) {
-            await client.query('ROLLBACK');
+        const { data: rooms, error: roomError } = await insforge.database
+            .from('rooms')
+            .select('id, price')
+            .eq('roomType', room_type)
+            .limit(1);
+
+        if (roomError) throw roomError;
+
+        if (!rooms || rooms.length === 0) {
             return res.status(404).json({ error: `Room type '${room_type}' not found.` });
         }
-        const roomId = roomRes.rows[0].id;
-        const price = roomRes.rows[0].price;
+        const roomId = rooms[0].id;
+        const price = rooms[0].price;
 
         // 3. Create the booking
-        const bookingRes = await client.query(
-            `INSERT INTO bookings (id, "userId", "roomId", "checkIn", "checkOut", "totalAmount", "status", "createdAt", "updatedAt") 
-             VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, 'CONFIRMED'::"BookingStatus", NOW(), NOW()) 
-             RETURNING id`,
-            [userId, roomId, new Date(check_in), new Date(check_out), price]
-        );
-        const bookingId = bookingRes.rows[0].id;
+        const { data: booking, error: bookingError } = await insforge.database
+            .from('bookings')
+            .insert([
+                {
+                    userId,
+                    roomId,
+                    checkIn: new Date(check_in).toISOString(),
+                    checkOut: new Date(check_out).toISOString(),
+                    totalAmount: price, // Note: Logic should might need multiplier by days, but keeping as is per original code
+                    status: 'CONFIRMED',
+                    bookingTime: new Date().toISOString(),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                }
+            ])
+            .select('id')
+            .single();
 
-        // 4. Record availability
+        if (bookingError) throw bookingError;
+        const bookingId = booking.id;
+
+        // 4. Record availability (Loop)
+        // InsForge/Supabase SDK supports bulk insert which is better
         let curr = new Date(check_in);
         const end = new Date(check_out);
+        const availabilityRecords = [];
+
         while (curr < end) {
-            await client.query(
-                `INSERT INTO room_availability (id, "roomId", "date", "isBooked", "bookingId") 
-                 VALUES (gen_random_uuid()::text, $1, $2, true, $3)
-                 ON CONFLICT ("roomId", "date") DO UPDATE SET "isBooked" = true, "bookingId" = $3`,
-                [roomId, new Date(curr), bookingId]
-            );
+            availabilityRecords.push({
+                roomId,
+                date: new Date(curr).toISOString(), // Ensure date format matches DB
+                isBooked: true,
+                bookingId
+            });
             curr.setDate(curr.getDate() + 1);
         }
 
-        await client.query('COMMIT');
-        await client.end();
+        if (availabilityRecords.length > 0) {
+            const { error: avError } = await insforge.database
+                .from('room_availability')
+                .upsert(availabilityRecords, { onConflict: 'roomId,date' }); // Ensure unique constraint exists
+
+            if (avError) throw avError;
+        }
 
         return res.status(200).json({
             success: true,
@@ -91,11 +132,7 @@ export default async function handler(
         });
 
     } catch (error: any) {
-        if (client) {
-            await client.query('ROLLBACK').catch(() => { });
-            await client.end().catch(() => { });
-        }
-        console.error('DATABASE_ERROR_DETAILED:', error);
+        console.error('db_error:', error);
         return res.status(500).json({
             error: 'Database error',
             details: error.message,

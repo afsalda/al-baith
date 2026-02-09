@@ -1,7 +1,6 @@
+
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { Client } = require('pg');
+import { insforge } from '../lib/insforge';
 
 export default async function handler(
     request: VercelRequest,
@@ -25,63 +24,62 @@ export default async function handler(
         return response.status(405).json({ error: 'Method not allowed' });
     }
 
-    const connectionString = process.env.DATABASE_URL;
-    if (!connectionString) {
-        return response.status(500).json({ error: 'Server configuration error' });
+    // Check InsForge client
+    if (!insforge) {
+        console.error('InsForge client not initialized');
+        return response.status(500).json({ error: 'Database configuration error' });
     }
 
-    const client = new Client({
-        connectionString,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    });
-
     try {
-        await client.connect();
+        const { data: bookings, error } = await insforge.database
+            .from('bookings')
+            .select(`
+                id,
+                checkIn,
+                checkOut,
+                status,
+                totalAmount,
+                bookingTime,
+                createdAt,
+                user:users (
+                    name,
+                    email,
+                    phone
+                ),
+                room:rooms (
+                    id,
+                    roomType,
+                    price
+                )
+            `)
+            .order('createdAt', { ascending: false });
 
-        const query = `
-      SELECT 
-        b.id, 
-        c.name as "customerName", 
-        c.email, 
-        c.phone, 
-        b.check_in as "checkIn", 
-        b.check_out as "checkOut", 
-        b.status,
-        b.created_at as "createdAt",
-        r.room_type as "roomType",
-        r.id as "roomId",
-        r.price
-      FROM bookings b
-      JOIN customers c ON b.customer_id = c.id
-      JOIN rooms r ON b.room_id = r.id
-      ORDER BY b.id DESC
-    `;
+        if (error) {
+            console.error('Fetch Bookings Error:', error);
+            throw error;
+        }
 
-        const result = await client.query(query);
-
-        // Map to frontend Booking interface
-        const bookings = result.rows.map(row => ({
-            id: row.id.toString(),
-            customerName: row.customerName,
-            email: row.email,
-            phone: row.phone,
-            checkIn: row.checkIn,
-            checkOut: row.checkOut,
-            roomType: row.roomType,
-            roomId: row.roomId ? row.roomId.toString() : 'unknown',
-            guests: 2, // Default
-            totalAmount: row.price || 0, // Default to room price per night (simplified)
-            paymentStatus: row.paymentStatus || 'pending', // Assume paymentStatus added later or use mock for now
-            bookingStatus: row.status || 'pending', // Use real status
-            createdAt: row.createdAt || new Date().toISOString()
+        // Map to frontend interface
+        const transformedBookings = (bookings || []).map((b: any) => ({
+            id: b.id.toString(),
+            customerName: b.user?.name || 'Unknown',
+            email: b.user?.email || 'N/A',
+            phone: b.user?.phone || 'N/A',
+            checkIn: b.checkIn,
+            checkOut: b.checkOut,
+            roomType: b.room?.roomType || 'Unknown Room',
+            roomId: b.room?.id ? b.room.id.toString() : 'unknown',
+            guests: 2, // Minimal data
+            totalAmount: b.totalAmount || b.room?.price || 0,
+            paymentStatus: 'paid', // Hardcoded as placeholder
+            bookingStatus: b.status || 'pending',
+            bookingTime: b.bookingTime || b.createdAt,
+            createdAt: b.createdAt
         }));
 
-        await client.end();
-
-        return response.status(200).json(bookings);
+        return response.status(200).json(transformedBookings);
     } catch (error: any) {
-        console.error('Database error:', error);
-        try { await client.end(); } catch (e) { }
+        console.error('Fetch Bookings API Error:', error);
         return response.status(500).json({ error: 'Internal server error', details: error.message });
     }
 }

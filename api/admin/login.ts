@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const { Client } = require('pg');
+import { insforge } from '../../lib/insforge';
 import jwt from 'jsonwebtoken';
 
 // Secret key for JWT - in production this should be in .env
@@ -40,29 +39,35 @@ export default async function handler(
         return response.status(400).json({ error: 'Email and password are required' });
     }
 
-    const client = new Client({
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-    });
+    // Check InsForge client
+    if (!insforge) {
+        console.error('InsForge client not initialized');
+        return response.status(500).json({ error: 'Database configuration error' });
+    }
 
     try {
-        await client.connect();
+        const { data: admins, error } = await insforge.database
+            .from('admins')
+            .select('*')
+            .eq('email', email);
 
-        // Check against admins table
-        const query = 'SELECT * FROM admins WHERE email = $1';
-        const result = await client.query(query, [email]);
+        if (error) {
+            console.error('InsForge query error:', error);
+            throw error;
+        }
 
-        console.log('[Login API] DB Query result count:', result.rows.length);
+        console.log('[Login API] DB Query result count:', admins?.length || 0);
 
-        if (result.rows.length === 0) {
+        if (!admins || admins.length === 0) {
             console.log('[Login API] User not found for email:', email);
             return response.status(401).json({ error: 'Invalid credentials (user not found)' });
         }
 
-        const admin = result.rows[0];
+        const admin = admins[0];
         console.log('[Login API] User found, checking password...');
 
         // Simple password check (Equality)
+        // Note: In production, use hashed passwords!
         if (admin.password_hash !== password) {
             console.log('[Login API] Password mismatch');
             // Check if there is a trimmed mismatch
@@ -91,7 +96,5 @@ export default async function handler(
     } catch (error: any) {
         console.error('Login error:', error);
         return response.status(500).json({ error: 'Internal server error' });
-    } finally {
-        await client.end();
     }
 }
