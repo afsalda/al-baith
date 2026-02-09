@@ -1,17 +1,18 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { insforge } from '../lib/insforge';
+import { getInsforgeClient } from '../lib/insforge';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     try {
         const envKeys = Object.keys(process.env);
-        const insforgeStatus = insforge ? 'initialized' : 'null';
+        const client = getInsforgeClient();
+        const insforgeStatus = client ? 'initialized' : 'null';
 
         let dbCheck = 'not attempted';
         let dbError = null;
 
-        if (insforge) {
+        if (client) {
             try {
-                const { data, error } = await insforge.database.from('rooms').select('id').limit(1);
+                const { data, error } = await client.database.from('rooms').select('id').limit(1);
                 if (error) {
                     dbCheck = 'failed';
                     dbError = error;
@@ -30,6 +31,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             dbCheck,
             dbError,
             envKeys: envKeys.filter(k => k.includes('INSFORGE') || k.includes('VITE_')),
+            url: process.env.VITE_INSFORGE_URL,
+            hasKey: !!process.env.VITE_INSFORGE_ANON_KEY,
             time: new Date().toISOString()
         });
     } catch (error: any) {

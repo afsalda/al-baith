@@ -1,48 +1,61 @@
 
 import { createClient } from '@insforge/sdk';
 
-// Safely access env vars in both Vite (client) and Node/Vercel (server) environments
-// In Vite: import.meta.env.VITE_xxx
-// In Node/Vercel: process.env.VITE_xxx or process.env.NEXT_PUBLIC_xxx
-const getEnv = (key: string) => {
-    // Try import.meta.env first (Vite)
-    try {
-        if (import.meta && (import.meta as any).env && (import.meta as any).env[key]) {
-            return (import.meta as any).env[key];
-        }
-    } catch (e) { /* ignore */ }
+// Robust environment variable loader
+const getEnv = (key: string): string | undefined => {
+    // 1. Try process.env (Node.js / Vercel Serverless)
+    if (typeof process !== 'undefined' && process.env && process.env[key]) {
+        return process.env[key];
+    }
 
-    // Try process.env next (Node/Vercel)
+    // 2. Try import.meta.env (Vite Client-side)
     try {
-        if (typeof process !== 'undefined' && process.env && process.env[key]) {
-            return process.env[key];
+        const meta = (import.meta as any);
+        if (meta && meta.env && meta.env[key]) {
+            return meta.env[key];
         }
-    } catch (e) { /* ignore */ }
+    } catch (e) { }
 
-    // Try NEXT_PUBLIC_ variant if VITE_ fails
-    try {
-        const nextKey = key.replace('VITE_', 'NEXT_PUBLIC_');
-        if (typeof process !== 'undefined' && process.env && process.env[nextKey]) {
-            return process.env[nextKey];
-        }
-    } catch (e) { /* ignore */ }
+    // 3. Fallback for NEXT_PUBLIC_ pattern if needed
+    const nextKey = key.startsWith('VITE_') ? key.replace('VITE_', 'NEXT_PUBLIC_') : `NEXT_PUBLIC_${key}`;
+    if (typeof process !== 'undefined' && process.env && process.env[nextKey]) {
+        return process.env[nextKey];
+    }
 
     return undefined;
 };
 
-const insforgeUrl = getEnv('VITE_INSFORGE_URL');
-const insforgeAnonKey = getEnv('VITE_INSFORGE_ANON_KEY');
+// Singleton pattern with lazy initialization to prevent top-level crashes
+let _client: any = null;
 
-// Initialize with checks inside a proxy or just check before use in handlers
-// To prevent top-level module load failures, we export a possibly null/invalid client 
-// and handle it in the handlers.
-export const insforge = (insforgeUrl && insforgeAnonKey)
-    ? createClient({
-        baseUrl: insforgeUrl,
-        anonKey: insforgeAnonKey,
-    })
-    : null as any;
+export const getInsforgeClient = () => {
+    if (_client) return _client;
 
-if (!insforge && typeof process !== 'undefined') {
-    console.warn('InsForge client NOT initialized due to missing VITE_INSFORGE_URL or VITE_INSFORGE_ANON_KEY');
-}
+    const url = getEnv('VITE_INSFORGE_URL');
+    const key = getEnv('VITE_INSFORGE_ANON_KEY');
+
+    if (!url || !key) {
+        console.warn('InsForge credentials missing in getInsforgeClient');
+        return null;
+    }
+
+    try {
+        _client = createClient({
+            baseUrl: url,
+            anonKey: key,
+        });
+        return _client;
+    } catch (error) {
+        console.error('Failed to create InsForge client:', error);
+        return null;
+    }
+};
+
+// For backward compatibility but safe
+export const insforge = new Proxy({} as any, {
+    get: (target, prop) => {
+        const client = getInsforgeClient();
+        if (!client) throw new Error(`InsForge client not initialized. Missing VITE_INSFORGE_URL or VITE_INSFORGE_ANON_KEY. Checked process.env.${prop.toString()}`);
+        return client[prop];
+    }
+});

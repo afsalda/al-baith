@@ -34,10 +34,19 @@ export default async function handler(
     try {
         console.log('[API] New booking request for:', email, room_type);
 
+        // 1. Validate client
+        let db;
+        try {
+            db = insforge.database;
+        } catch (e: any) {
+            console.error('[API] InsForge init failed:', e.message);
+            return res.status(500).json({ error: 'Database configuration error', details: e.message });
+        }
+
         // 1. Check if user exists
         let userId;
         console.log('[API] Checking user...');
-        const { data: users, error: userError } = await insforge.database
+        const { data: users, error: userError } = await db
             .from('users')
             .select('id')
             .eq('email', email);
@@ -52,7 +61,7 @@ export default async function handler(
             console.log('[API] Existing user found:', userId);
         } else {
             console.log('[API] Creating new user...');
-            const { data: newUser, error: createError } = await insforge.database
+            const { data: newUser, error: createError } = await db
                 .from('users')
                 .insert([
                     {
@@ -78,7 +87,7 @@ export default async function handler(
 
         // 2. Find the room
         console.log('[API] Finding room type:', room_type);
-        const { data: rooms, error: roomError } = await insforge.database
+        const { data: rooms, error: roomError } = await db
             .from('rooms')
             .select('id, price')
             .eq('roomType', room_type)
@@ -98,7 +107,7 @@ export default async function handler(
 
         // 3. Create the booking
         console.log('[API] Creating booking for room:', roomId);
-        const { data: booking, error: bookingError } = await insforge.database
+        const { data: booking, error: bookingError } = await db
             .from('bookings')
             .insert([
                 {
@@ -140,7 +149,7 @@ export default async function handler(
         }
 
         if (availabilityRecords.length > 0) {
-            const { error: avError } = await insforge.database
+            const { error: avError } = await db
                 .from('room_availability')
                 .upsert(availabilityRecords, { onConflict: 'roomId,date' });
 
@@ -162,7 +171,7 @@ export default async function handler(
         return res.status(500).json({
             error: 'Server error',
             message: error.message || 'An unknown error occurred',
-            details: error
+            raw: JSON.stringify(error)
         });
     }
 }
