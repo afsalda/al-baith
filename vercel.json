@@ -31,10 +31,5 @@
                 }
             ]
         }
-    ],
-    "protectionBypass": [
-        {
-            "source": "/api/(.*)"
-        }
     ]
 }
