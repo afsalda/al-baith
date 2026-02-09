@@ -33,15 +33,16 @@ const getEnv = (key: string) => {
 const insforgeUrl = getEnv('VITE_INSFORGE_URL');
 const insforgeAnonKey = getEnv('VITE_INSFORGE_ANON_KEY');
 
-if (!insforgeUrl || !insforgeAnonKey) {
-    // Log the error to help debug (only on server side to avoid exposing internals to client console too loudly)
-    if (typeof process !== 'undefined') {
-        console.error('Missing InsForge URL or Anon Key. Checked VITE_INSFORGE_URL and VITE_INSFORGE_ANON_KEY associated vars.');
-    }
-    throw new Error('Missing InsForge URL or Anon Key');
-}
+// Initialize with checks inside a proxy or just check before use in handlers
+// To prevent top-level module load failures, we export a possibly null/invalid client 
+// and handle it in the handlers.
+export const insforge = (insforgeUrl && insforgeAnonKey)
+    ? createClient({
+        baseUrl: insforgeUrl,
+        anonKey: insforgeAnonKey,
+    })
+    : null as any;
 
-export const insforge = createClient({
-    baseUrl: insforgeUrl,
-    anonKey: insforgeAnonKey,
-});
+if (!insforge && typeof process !== 'undefined') {
+    console.warn('InsForge client NOT initialized due to missing VITE_INSFORGE_URL or VITE_INSFORGE_ANON_KEY');
+}

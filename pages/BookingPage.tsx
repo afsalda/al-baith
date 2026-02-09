@@ -99,8 +99,15 @@ const BookingPage: React.FC = () => {
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Booking failed');
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || errorData.message || 'Booking failed');
+                } else {
+                    const errorText = await response.text();
+                    console.error('Server returned non-JSON error:', errorText);
+                    throw new Error(`Server Error (${response.status}): The server returned an unexpected response. Please try again later.`);
+                }
             }
 
             setShowSuccess(true);
@@ -332,6 +339,7 @@ const BookingPage: React.FC = () => {
                 isOpen={isLoginModalOpen}
                 onClose={() => setIsLoginModalOpen(false)}
                 onLoginSuccess={handleLoginSuccess}
+                mode="login"
             />
         </div>
     );
