@@ -1,5 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { insforge } from '../lib/insforge';
+import { createClient } from '@insforge/sdk';
+
+// Hardcoded credentials for debugging - will remove after fix confirmed
+const INSFORGE_URL = 'https://i8m3i9mq.us-west.insforge.app';
+const INSFORGE_KEY = 'ik_193e152f1386d1beed3ac3af245345b01773d53da044715f726c94493c64ada3';
+
+const insforge = createClient({
+    baseUrl: INSFORGE_URL,
+    anonKey: INSFORGE_KEY,
+});
 
 export default async function handler(
     req: VercelRequest,
@@ -26,22 +35,10 @@ export default async function handler(
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    if (!insforge) {
-        console.error('InsForge client not initialized');
-        return res.status(500).json({ error: 'Database configuration error' });
-    }
-
     try {
         console.log('[API] New booking request for:', email, room_type);
 
-        // 1. Validate client
-        let db;
-        try {
-            db = insforge.database;
-        } catch (e: any) {
-            console.error('[API] InsForge init failed:', e.message);
-            return res.status(500).json({ error: 'Database configuration error', details: e.message });
-        }
+        const db = insforge.database;
 
         // 1. Check if user exists
         let userId;

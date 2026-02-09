@@ -1,0 +1,45 @@
+﻿node.exe : Vercel CLI 49.1.2
+At C:\Users\M S I\AppData\Ro
+aming\npm\vercel.ps1:24 
+char:5
++     & "node$exe"  "$basedi
+r/node_modules/vercel/dist/v
+c.js" $args
++     ~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (Verce  
+  l CLI 49.1.2:String) []   
+ , RemoteException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+Retrieving projectΓÇª
+> Environment Variables 
+found for afsals-projects-2e
+91ab61/al-baith [847ms]
+
+ name                        value               environments                        created    
+ VITE_INSFORGE_ANON_KEY      Encrypted           Production                          54s ago    
+ VITE_INSFORGE_URL           Encrypted           Production                          58s ago    
+ JWT_SECRET                  Encrypted           Development, Preview, Production    55m ago    
+ POSTGRES_PRISMA_URL         Encrypted           Production, Preview, Development    23h ago    
+ POSTGRES_URL                Encrypted           Production, Preview, Development    23h ago    
+ PGUSER                      Encrypted           Production, Preview, Development    23h ago    
+ PGPASSWORD                  Encrypted           Production, Preview, Development    23h ago    
+ DATABASE_URL_UNPOOLED       Encrypted           Production, Preview, Development    23h ago    
+ NEON_PROJECT_ID             Encrypted           Production, Preview, Development    23h ago    
+ PGDATABASE                  Encrypted           Production, Preview, Development    23h ago    
+ PGHOST_UNPOOLED             Encrypted           Production, Preview, Development    23h ago    
+ POSTGRES_USER               Encrypted           Production, Preview, Development    23h ago    
+ POSTGRES_DATABASE           Encrypted           Production, Preview, Development    23h ago    
+ NEON_AUTH_BASE_URL          Encrypted           Production, Preview, Development    23h ago    
+ PGHOST                      Encrypted           Production, Preview, Development    23h ago    
+ VITE_NEON_AUTH_URL          Encrypted           Production, Preview, Development    23h ago    
+ POSTGRES_URL_NO_SSL         Encrypted           Production, Preview, Development    23h ago    
+ POSTGRES_HOST               Encrypted           Production, Preview, Development    23h ago    
+ DATABASE_URL                Encrypted           Production, Preview, Development    23h ago    
+ POSTGRES_URL_NON_POOLING    Encrypted           Production, Preview, Development    23h ago    
+ POSTGRES_PASSWORD           Encrypted           Production, Preview, Development    23h ago    
+
