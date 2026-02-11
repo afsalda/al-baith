@@ -12,7 +12,7 @@ const insforge = createClient({
 });
 
 // Resend API Key
-const RESEND_KEY = process.env.RESEND_API_KEY || 're_GAj1ujqY_6YKnke9bZ72wmyLEi7ZpWcqF';
+const RESEND_KEY = process.env.RESEND_API_KEY || 're_dEtH68EH_635wtc8N9si147bfue1Matt1versel';
 const resend = new Resend(RESEND_KEY);
 
 console.log('[API] Initializing Resend with key:', RESEND_KEY ? `${RESEND_KEY.substring(0, 5)}...` : 'undefined');
