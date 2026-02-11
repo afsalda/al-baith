@@ -11,8 +11,8 @@ const insforge = createClient({
     anonKey: INSFORGE_KEY,
 });
 
-// Hotel's Resend Account Key
-const RESEND_KEY = process.env.RESEND_API_KEY || 're_dEtH68EH_635wtc8N9si147bfue1Matt1';
+// Resend API Key
+const RESEND_KEY = process.env.RESEND_API_KEY || 're_dEtH68EH_635wtc8N9si147bfue1Matt1versel';
 const resend = new Resend(RESEND_KEY);
 
 console.log('[API] Initializing Resend with key:', RESEND_KEY ? `${RESEND_KEY.substring(0, 5)}...` : 'undefined');
@@ -171,15 +171,14 @@ export default async function handler(
         const formatDate = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         // Send emails sequentially to debug delivery issues
-        // Using the Hotel's verified email account
-        const HOTEL_ADMIN_EMAIL = 'albaith.booking@gmail.com';
-
-        console.log(`[API] 1. Sending Admin Notification to ${HOTEL_ADMIN_EMAIL}...`);
+        const adminEmailRecipient = 'muhammedafsalda@gmail.com'; // Resend free tier verified email
+        console.log(`[API] 1. Sending Admin Notification to ${adminEmailRecipient}...`);
         try {
+            // Simplified Admin Email to reduce spam filtering
             const bookingTime = new Date().toLocaleTimeString();
             const { data: adminData, error: adminError } = await resend.emails.send({
                 from: 'Al-Baith Resort <onboarding@resend.dev>',
-                to: HOTEL_ADMIN_EMAIL,
+                to: adminEmailRecipient,
                 subject: `🔔 NEW BOOKING: ${name} [${bookingTime}]`,
                 text: `New Booking Request\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nRoom: ${room_type}\nDates: ${check_in} to ${check_out}\nGuests: ${guests}\nPrice: ₹${totalPrice.toLocaleString()}\n\nBooking ID: ${bookingId}`,
                 html: `
@@ -211,15 +210,14 @@ export default async function handler(
             console.error('[API] ❌ Admin email CRASHED:', err);
         }
 
-        console.log(`[API] 2. Sending Customer Confirmation to ${email}...`);
+        console.log(`[API] 2. Sending Customer Confirmation to ${email} (with BCC to Admin)...`);
         try {
-            // Note: If on Free Tier, this will only succeed if 'email' is 'albaith.booking@gmail.com'
-            // or if the domain is verified.
+            // Note: On free tier, 'to' must be 'muhammedafsalda@gmail.com' or verified domain. 
+            // If 'email' is 'muhammedafsalda@gmail.com', it works. If not, it fails.
             const { data: customerData, error: customerError } = await resend.emails.send({
                 from: 'Al-Baith Resort <onboarding@resend.dev>',
-                to: email,
-                // BCC to admin as backup, ONLY if recipient isn't admin
-                bcc: email === HOTEL_ADMIN_EMAIL ? undefined : HOTEL_ADMIN_EMAIL,
+                to: email, // This will fail if not verified, but we catch it.
+                bcc: adminEmailRecipient, // ⚠️ BACKUP: Ensure admin gets a copy!
                 subject: `✨ Booking Confirmed - Al-Baith Resort | ${room_type} #${bookingId.substring(0, 4)}`,
                 html: `
                     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; background: #fffdf7; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.08); border: 1px solid #f0e6cc;">
@@ -272,6 +270,31 @@ export default async function handler(
                             </div>
                         </div>
 
+                        <!-- Cancellation Policy Section -->
+                        <div style="background: #fdfbf7; margin: 0 32px 32px; padding: 24px; border-radius: 12px; border: 1px dashed #dcd0bc;">
+                            <h3 style="color: #92640a; margin: 0 0 12px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Cancellation Policy</h3>
+                            
+                            <p style="color: #4b5563; font-size: 13px; margin: 0 0 12px; line-height: 1.5;">To cancel or modify your booking, please contact Al-Baith Resort directly:</p>
+                            
+                            <ul style="list-style: none; padding: 0; margin: 0 0 16px;">
+                                <li style="margin-bottom: 6px; color: #1f2937; font-size: 13px;">📞 <strong>Call us:</strong> +91 6238304411</li>
+                                <li style="margin-bottom: 6px; color: #1f2937; font-size: 13px;">📧 <strong>Email:</strong> <a href="mailto:albaith.booking@gmail.com" style="color: #B8860B; text-decoration: none;">albaith.booking@gmail.com</a></li>
+                            </ul>
+
+                            <p style="color: #6b7280; font-size: 12px; font-style: italic; margin: 0 0 12px;">Our team is available from 9:00 AM to 9:00 PM (IST) to assist you with any changes.</p>
+
+                            <div style="background: #fff; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                                <p style="color: #374151; font-size: 12px; font-weight: 600; margin: 0 0 4px;">Cancellation Terms:</p>
+                                <ul style="margin: 0; padding-left: 16px; color: #4b5563; font-size: 12px; line-height: 1.5;">
+                                    <li>Free cancellation up to 24 hours before check-in</li>
+                                    <li>Cancellations within 24 hours may incur charges</li>
+                                    <li>No-shows will be charged the full amount</li>
+                                </ul>
+                            </div>
+                            
+                            <p style="color: #9ca3af; font-size: 11px; margin: 12px 0 0;">For immediate assistance, calling is the fastest way to reach us.</p>
+                        </div>
+                        
                         <div style="padding: 0 32px 32px; text-align: center;">
                             <p style="color: #9ca3af; font-size: 13px; margin: 0;">Need help? Contact us at</p>
                             <a href="mailto:albaith.booking@gmail.com" style="color: #B8860B; font-size: 14px; font-weight: 600; text-decoration: none;">albaith.booking@gmail.com</a>
@@ -283,7 +306,7 @@ export default async function handler(
             if (customerError) {
                 console.error('[API] ❌ Customer email FAILED:', JSON.stringify(customerError));
             } else {
-                console.log('[API] ✅ Customer confirmation sent:', JSON.stringify(customerData));
+                console.log('[API] ✅ Customer confirmation sent (BCC included):', JSON.stringify(customerData));
             }
         } catch (err) {
             console.error('[API] ❌ Customer email CRASHED:', err);
