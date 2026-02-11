@@ -10,37 +10,85 @@ const CancellationPolicyPage: React.FC = () => {
             </div>
 
             <div className="max-w-4xl mx-auto px-6 py-12 space-y-16">
-                {/* Cancellation Rule */}
-                <section>
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center">
-                        <span className="w-2 h-2 bg-neutral-900 rounded-full mr-3"></span>
-                        Cancellation Rule
+                {/* How to Request a Cancellation */}
+                <section className="bg-amber-50 border border-amber-200 rounded-2xl p-8 shadow-sm">
+                    <h2 className="text-2xl font-bold text-amber-900 mb-4 flex items-center">
+                        <span className="text-3xl mr-3">📞</span>
+                        How to Request a Cancellation
                     </h2>
-                    <div className="pl-5 border-l border-neutral-100">
-                        <p className="text-lg text-neutral-800 font-medium mb-4">
-                            Cancellation is allowed only if requested at least 24 hours before the scheduled check-in time (12:00 PM on the arrival date).
-                        </p>
-                        <p className="text-neutral-600">
-                            Requests made less than 24 hours before check-in will not be eligible for a refund.
-                        </p>
+                    <p className="text-amber-800 mb-6 text-lg">
+                        To ensure secure processing, we do not accept cancellations via the website.
+                        <strong> You must contact us directly via phone or email.</strong>
+                    </p>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="bg-white p-6 rounded-xl border border-amber-100 shadow-sm transition hover:shadow-md">
+                            <div className="flex items-center mb-3">
+                                <span className="text-2xl mr-3">📞</span>
+                                <h3 className="font-bold text-gray-900">Call Us</h3>
+                            </div>
+                            <p className="text-gray-600 mb-3 text-sm">Fastest way for immediate assistance</p>
+                            <a href="tel:+916238304411" className="block text-xl font-bold text-amber-700 hover:underline mb-1">
+                                +91 6238-304411
+                            </a>
+                            <div className="text-sm text-gray-500 mt-2 flex items-center">
+                                <span className="mr-2">⏰</span> 9:00 AM - 9:00 PM (IST)
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-xl border border-amber-100 shadow-sm transition hover:shadow-md">
+                            <div className="flex items-center mb-3">
+                                <span className="text-2xl mr-3">📧</span>
+                                <h3 className="font-bold text-gray-900">Email Us</h3>
+                            </div>
+                            <p className="text-gray-600 mb-3 text-sm">For non-urgent modifications</p>
+                            <a href="mailto:albaith.booking@gmail.com" className="block text-lg font-bold text-amber-700 hover:underline break-all">
+                                albaith.booking@gmail.com
+                            </a>
+                            <p className="text-xs text-gray-400 mt-2">Response within 24 hours</p>
+                        </div>
                     </div>
                 </section>
 
-                {/* Refund Rules */}
+                {/* Cancellation Rules */}
                 <section>
                     <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center">
                         <span className="w-2 h-2 bg-neutral-900 rounded-full mr-3"></span>
-                        Refund Rules
+                        Cancellation Terms
                     </h2>
-                    <div className="space-y-6 pl-5 border-l border-neutral-100">
+                    <div className="pl-5 border-l-2 border-neutral-200 ml-1 space-y-6">
                         <div>
-                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">Full Refunds</h3>
-                            <p className="text-neutral-600">Eligible cancellations processed before the 24-hour cutoff will receive a full refund, minus any standard processing fees if applicable.</p>
+                            <h3 className="font-bold text-lg text-neutral-800 mb-2">⏱️ 24-Hour Free Cancellation</h3>
+                            <p className="text-neutral-600">
+                                You may cancel your booking free of charge up to <strong>24 hours before your scheduled check-in time</strong> (12:00 PM on arrival date).
+                            </p>
                         </div>
                         <div>
-                            <h3 className="font-semibold text-lg text-neutral-800 mb-2">Processing Time</h3>
-                            <p className="text-neutral-600">Refunds are typically processed within 5-7 business days back to the original payment method.</p>
+                            <h3 className="font-bold text-lg text-neutral-800 mb-2">💸 Late Cancellations</h3>
+                            <p className="text-neutral-600">
+                                Cancellations made <strong>within 24 hours</strong> of check-in are not eligible for a refund and may incur a charge equal to the first night's stay.
+                            </p>
                         </div>
+                    </div>
+                </section>
+
+                {/* Refund Policy */}
+                <section>
+                    <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center">
+                        <span className="w-2 h-2 bg-neutral-900 rounded-full mr-3"></span>
+                        Refund Policy
+                    </h2>
+                    <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                        <ul className="space-y-4">
+                            <li className="flex items-start">
+                                <span className="text-green-600 mr-3 font-bold">✓</span>
+                                <span className="text-neutral-700">Full refunds (minus standard processing fees) are issued for timely cancellations.</span>
+                            </li>
+                            <li className="flex items-start">
+                                <span className="text-blue-600 mr-3 font-bold">ℹ️</span>
+                                <span className="text-neutral-700">Refunds are typically processed to the original payment method within <strong>5-7 business days</strong>.</span>
+                            </li>
+                        </ul>
                     </div>
                 </section>
 
@@ -50,33 +98,11 @@ const CancellationPolicyPage: React.FC = () => {
                         <span className="w-2 h-2 bg-neutral-900 rounded-full mr-3"></span>
                         No-Show Policy
                     </h2>
-                    <div className="pl-5 border-l border-neutral-100">
+                    <div className="pl-5 border-l-2 border-red-200 ml-1">
                         <p className="text-neutral-600">
-                            Failure to arrive at the property without prior cancellation will be treated as a no-show. In such cases, the entire booking amount will be forfeited, and no refund will be issued.
+                            Failure to check in without prior notice is considered a <strong>No-Show</strong>.
+                            The entire booking amount will be forfeited, and the reservation will be released.
                         </p>
-                    </div>
-                </section>
-
-                {/* Contact for Support */}
-                <section className="bg-neutral-50 p-8 rounded-2xl border border-neutral-100">
-                    <h2 className="text-2xl font-bold text-neutral-900 mb-6 flex items-center">
-                        <span className="w-2 h-2 bg-neutral-900 rounded-full mr-3"></span>
-                        Contact Support
-                    </h2>
-                    <p className="text-neutral-600 mb-8">To request a cancellation or for any questions, please contact our support team:</p>
-                    <div className="space-y-4">
-                        <div className="flex flex-col gap-2 pb-3 border-b border-neutral-200">
-                            <span className="text-neutral-500 font-medium">Call / WhatsApp</span>
-                            <div className="flex flex-col gap-1">
-                                <a href="https://wa.me/916238304411" target="_blank" rel="noopener noreferrer" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">6238-304411</a>
-                                <a href="https://wa.me/918848805197" target="_blank" rel="noopener noreferrer" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">8848805197</a>
-                                <a href="https://wa.me/919447290936" target="_blank" rel="noopener noreferrer" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">9447290936</a>
-                            </div>
-                        </div>
-                        <div className="flex justify-between items-center pb-3 border-b border-neutral-200">
-                            <span className="text-neutral-500 font-medium">Email</span>
-                            <a href="mailto:albaith.booking@gmail.com" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">albaith.booking@gmail.com</a>
-                        </div>
                     </div>
                 </section>
             </div>

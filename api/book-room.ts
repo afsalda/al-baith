@@ -274,7 +274,7 @@ export default async function handler(
                         <div style="background: #fdfbf7; margin: 0 32px 32px; padding: 24px; border-radius: 12px; border: 1px dashed #dcd0bc;">
                             <h3 style="color: #92640a; margin: 0 0 12px; font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Cancellation Policy</h3>
                             
-                            <p style="color: #4b5563; font-size: 13px; margin: 0 0 12px; line-height: 1.5;">To cancel or modify your booking, please contact Al-Baith Resort directly:</p>
+                            <p style="color: #4b5563; font-size: 13px; margin: 0 0 12px; line-height: 1.5;">To ensure secure processing, <strong>online cancellations are not available</strong>. Please contact Al-Baith Resort directly:</p>
                             
                             <ul style="list-style: none; padding: 0; margin: 0 0 16px;">
                                 <li style="margin-bottom: 6px; color: #1f2937; font-size: 13px;">📞 <strong>Call us:</strong> +91 6238304411</li>
