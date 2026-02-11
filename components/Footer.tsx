@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
             <h5 className="font-bold">Location</h5>
             <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm h-64 md:h-48 w-full relative bg-gray-100">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d62882.84579050575!2d76.271367!3d9.9191404!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b0873f4e02b7091%3A0x14f8d912261157fd!2sAl-Baith%20Resthouse!5e0!3m2!1sen!2sin!4v1770457277502!5m2!1sen!2sin"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3930.1776017265493!2d76.31495617479247!3d9.919162090182168!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b0873f4e02b7091%3A0x14f8d912261157fd!2sAl-Baith%20Resthouse!5e0!3m2!1sen!2sin!4v1770838846090!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
                 style={{ border: 0, position: 'absolute', inset: 0 }}
