@@ -171,13 +171,14 @@ export default async function handler(
         const formatDate = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         // Send emails sequentially to debug delivery issues
-        console.log('[API] 1. Sending Admin Notification to albaith.booking@gmail.com...');
+        const adminEmailRecipient = 'muhammedafsalda@gmail.com'; // Resend free tier verified email
+        console.log(`[API] 1. Sending Admin Notification to ${adminEmailRecipient}...`);
         try {
             // Simplified Admin Email to reduce spam filtering
             const bookingTime = new Date().toLocaleTimeString();
             const { data: adminData, error: adminError } = await resend.emails.send({
                 from: 'Al-Baith Resort <onboarding@resend.dev>',
-                to: 'albaith.booking@gmail.com',
+                to: adminEmailRecipient,
                 subject: `🔔 NEW BOOKING: ${name} [${bookingTime}]`,
                 text: `New Booking Request\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nRoom: ${room_type}\nDates: ${check_in} to ${check_out}\nGuests: ${guests}\nPrice: ₹${totalPrice.toLocaleString()}\n\nBooking ID: ${bookingId}`,
                 html: `
@@ -211,10 +212,12 @@ export default async function handler(
 
         console.log(`[API] 2. Sending Customer Confirmation to ${email} (with BCC to Admin)...`);
         try {
+            // Note: On free tier, 'to' must be 'muhammedafsalda@gmail.com' or verified domain. 
+            // If 'email' is 'muhammedafsalda@gmail.com', it works. If not, it fails.
             const { data: customerData, error: customerError } = await resend.emails.send({
                 from: 'Al-Baith Resort <onboarding@resend.dev>',
-                to: email,
-                bcc: 'albaith.booking@gmail.com', // ⚠️ BACKUP: Ensure admin gets a copy!
+                to: email, // This will fail if not verified, but we catch it.
+                bcc: adminEmailRecipient, // ⚠️ BACKUP: Ensure admin gets a copy!
                 subject: `✨ Booking Confirmed - Al-Baith Resort | ${room_type} #${bookingId.substring(0, 4)}`,
                 html: `
                     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; background: #fffdf7; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.08); border: 1px solid #f0e6cc;">
