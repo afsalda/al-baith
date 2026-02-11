@@ -92,7 +92,8 @@ const BookingPage: React.FC = () => {
                     name: userData.fullName,
                     email: userData.email,
                     phone: `${userData.countryCode} ${userData.phoneNumber}`,
-                    room_type: room.roomType, // Assuming this matches DB expected values or we should use room.roomName
+                    room_type: room.roomType,
+                    guests: guestsParam, // Pass guests count to API
                     check_in: formatDate(checkInDate),
                     check_out: formatDate(checkOutDate)
                 }),
