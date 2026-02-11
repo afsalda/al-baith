@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { BedDouble, CalendarDays, TrendingUp, Users } from 'lucide-react';
 
 interface Stats {
@@ -99,12 +100,16 @@ const AdminDashboardPage: React.FC = () => {
                 </div>
             </div>
 
-            {/* Quick Actions or Recent Activity could go here */}
+            {/* Quick Actions */}
             <div className="mt-8">
                 <h2 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
-                <div className="flex gap-4">
-                    <a href="/admin/rooms" className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm font-medium">Manage Rooms</a>
-                    <a href="/admin/bookings" className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 text-sm font-medium">View Bookings</a>
+                <div className="flex flex-wrap gap-4">
+                    <Link to="/admin/rooms" className="px-6 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 text-sm font-semibold transition-all shadow-sm">
+                        Manage Rooms
+                    </Link>
+                    <Link to="/admin/bookings" className="px-6 py-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 text-sm font-semibold transition-all shadow-sm">
+                        View Bookings
+                    </Link>
                 </div>
             </div>
         </div>
