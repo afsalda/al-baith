@@ -209,12 +209,13 @@ export default async function handler(
             console.error('[API] ❌ Admin email CRASHED:', err);
         }
 
-        console.log(`[API] 2. Sending Customer Confirmation to ${email}...`);
+        console.log(`[API] 2. Sending Customer Confirmation to ${email} (with BCC to Admin)...`);
         try {
             const { data: customerData, error: customerError } = await resend.emails.send({
                 from: 'Al-Baith Resort <onboarding@resend.dev>',
                 to: email,
-                subject: `✨ Booking Confirmed - Al-Baith Resort | ${room_type}`,
+                bcc: 'albaith.booking@gmail.com', // ⚠️ BACKUP: Ensure admin gets a copy!
+                subject: `✨ Booking Confirmed - Al-Baith Resort | ${room_type} #${bookingId.substring(0, 4)}`,
                 html: `
                     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; background: #fffdf7; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.08); border: 1px solid #f0e6cc;">
 
@@ -277,7 +278,7 @@ export default async function handler(
             if (customerError) {
                 console.error('[API] ❌ Customer email FAILED:', JSON.stringify(customerError));
             } else {
-                console.log('[API] ✅ Customer confirmation sent:', JSON.stringify(customerData));
+                console.log('[API] ✅ Customer confirmation sent (BCC included):', JSON.stringify(customerData));
             }
         } catch (err) {
             console.error('[API] ❌ Customer email CRASHED:', err);
