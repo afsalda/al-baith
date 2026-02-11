@@ -7,7 +7,7 @@ const MobileNav: React.FC = () => {
 
     const navItems = [
         { label: 'Explore', path: '/', icon: <Home className="w-6 h-6" /> },
-        { label: 'Wishlists', path: '/experiences', icon: <Compass className="w-6 h-6" /> },
+        { label: 'Experience', path: '/experiences', icon: <Compass className="w-6 h-6" /> },
         { label: 'Services', path: '/services', icon: <Bell className="w-6 h-6" /> },
     ];
 

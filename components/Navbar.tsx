@@ -264,10 +264,10 @@ const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
         {/* Search Bar Row with Apple-inspired Sliding Animation */}
         <div className="flex justify-center pb-6 md:pb-8 pt-3 md:pt-4">
           <div className="w-full max-w-[600px] relative px-2 md:px-0">
-            <div className="relative flex flex-row items-center bg-white border border-neutral-200 rounded-full shadow-md hover:shadow-lg transition cursor-pointer h-14 md:h-16 group overflow-hidden">
-              {/* Animated sliding pill background */}
+            <div className="relative flex flex-col md:flex-row items-stretch md:items-center bg-white border border-neutral-200 rounded-3xl md:rounded-full shadow-md hover:shadow-lg transition cursor-pointer h-auto md:h-16 group overflow-visible md:overflow-hidden p-2 md:p-0 gap-1 md:gap-0">
+              {/* Animated sliding pill background - Desktop Only */}
               <div
-                className={`absolute top-0 bottom-0 bg-neutral-100 rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${activeSearchSection === 'when' ? 'left-0 w-[calc(50%-0.5px)]' :
+                className={`hidden md:block absolute top-0 bottom-0 bg-neutral-100 rounded-full transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${activeSearchSection === 'when' ? 'left-0 w-[calc(50%-0.5px)]' :
                   activeSearchSection === 'who' ? 'left-[calc(50%+0.5px)] w-[calc(50%-0.5px)]' :
                     'opacity-0'
                   }`}
@@ -282,11 +282,11 @@ const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
                 }}
                 onMouseEnter={() => !showGuestModal && setActiveSearchSection('when')}
                 onMouseLeave={() => !showCalendar && !showGuestModal && setActiveSearchSection(null)}
-                className="flex-1 flex flex-col justify-center px-4 md:px-10 rounded-full h-full transition-colors relative"
+                className="flex-1 flex flex-col justify-center px-6 py-3 md:p-0 md:px-10 rounded-2xl md:rounded-full hover:bg-neutral-100 md:hover:bg-transparent transition-colors relative border-b md:border-none border-neutral-100"
                 style={{ zIndex: 2 }}
               >
-                <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-wider">When</span>
-                <span className="text-xs md:text-sm text-neutral-500 truncate">
+                <span className="text-xs md:text-[12px] font-bold uppercase tracking-wider text-neutral-800">When</span>
+                <span className="text-sm text-neutral-600 truncate mt-0.5">
                   {selectedDate
                     ? selectedDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
                     : 'Add dates'
@@ -294,8 +294,8 @@ const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
                 </span>
               </div>
 
-              {/* Separator */}
-              <div className="h-6 md:h-8 w-[1px] bg-neutral-200 relative" style={{ zIndex: 2 }}></div>
+              {/* Separator - Desktop Only */}
+              <div className="hidden md:block h-6 md:h-8 w-[1px] bg-neutral-200 relative" style={{ zIndex: 2 }}></div>
 
               {/* Who section */}
               <div
@@ -305,12 +305,12 @@ const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
                 }}
                 onMouseEnter={() => !showCalendar && setActiveSearchSection('who')}
                 onMouseLeave={() => !showCalendar && !showGuestModal && setActiveSearchSection(null)}
-                className="flex-1 flex flex-row items-center justify-between pl-4 md:pl-10 pr-1 md:pr-2 rounded-full h-full transition-colors relative group/who"
+                className="flex-1 flex flex-row items-center justify-between pl-6 pr-2 py-2 md:p-0 md:pl-10 md:pr-2 rounded-2xl md:rounded-full hover:bg-neutral-100 md:hover:bg-transparent transition-colors relative group/who"
                 style={{ zIndex: 2 }}
               >
                 <div className="flex flex-col min-w-0 flex-shrink">
-                  <span className="text-[10px] md:text-[12px] font-bold uppercase tracking-wider">Who</span>
-                  <span className="text-xs md:text-sm text-neutral-500 truncate">
+                  <span className="text-xs md:text-[12px] font-bold uppercase tracking-wider text-neutral-800">Who</span>
+                  <span className="text-sm text-neutral-600 truncate mt-0.5">
                     {guestCounts.adults + guestCounts.children > 0
                       ? `${guestCounts.adults + guestCounts.children} guests`
                       : 'Add guests'}
@@ -320,15 +320,15 @@ const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
                   type="button"
                   onClick={handleSearch}
                   disabled={isSearching}
-                  className="bg-gold-glow text-amber-950 flex items-center gap-1 md:gap-2 px-2.5 md:px-6 py-2 md:py-3 rounded-full hover:shadow-lg transition active:scale-95 ml-1 md:ml-4 disabled:opacity-70 disabled:cursor-wait relative flex-shrink-0"
+                  className="bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-md flex items-center justify-center gap-2 px-6 py-3 md:py-3 rounded-full hover:shadow-lg hover:brightness-105 transition active:scale-95 ml-2 md:ml-4 disabled:opacity-70 disabled:cursor-wait relative flex-shrink-0 min-w-[44px] min-h-[44px]"
                   style={{ zIndex: 3 }}
                 >
                   {isSearching ? (
-                    <div className="h-3 w-3 md:h-4 md:w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
-                    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5 md:h-4 md:w-4" fill="none" stroke="currentColor" strokeWidth="4"><path d="m13 24c6.0751322 0 11-4.9248678 11-11 0-6.07513225-4.9248678-11-11-11-6.07513225 0-11 4.92486775-11 11 0 6.0751322 4.92486775 11 11 11zm8-3 9 9" /></svg>
+                    <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-4 md:w-4" fill="none" stroke="currentColor" strokeWidth="4"><path d="m13 24c6.0751322 0 11-4.9248678 11-11 0-6.07513225-4.9248678-11-11-11-6.07513225 0-11 4.92486775-11 11 0 6.0751322 4.92486775 11 11 11zm8-3 9 9" /></svg>
                   )}
-                  <span className="font-bold text-[10px] md:text-[15px] hidden md:inline">{isSearching ? '...' : 'Search'}</span>
+                  <span className="font-bold text-sm hidden md:inline">{isSearching ? '...' : 'Search'}</span>
                 </button>
               </div>
             </div>
