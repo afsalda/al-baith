@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@insforge/sdk';
+import { Resend } from 'resend';
 
 // Hardcoded credentials for debugging - will remove after fix confirmed
 const INSFORGE_URL = 'https://i8m3i9mq.us-west.insforge.app';
@@ -9,6 +10,9 @@ const insforge = createClient({
     baseUrl: INSFORGE_URL,
     anonKey: INSFORGE_KEY,
 });
+
+// Hardcoded for debugging - same approach as InsForge credentials above
+const resend = new Resend('re_GAj1ujqY_6YKnke9bZ72wmyLEi7ZpWcqF');
 
 export default async function handler(
     req: VercelRequest,
@@ -156,7 +160,71 @@ export default async function handler(
             }
         }
 
-        console.log('[API] Success!');
+        console.log('[API] Success! Sending email notification...');
+
+        // Send booking notification email (non-blocking — booking is already saved)
+        try {
+            const { data: emailData, error: emailError } = await resend.emails.send({
+                from: 'Al-Baith Resort <onboarding@resend.dev>',
+                to: 'albaith.booking@gmail.com',
+                subject: `🏨 New Booking - ${name}`,
+                html: `
+                    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
+                        <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); padding: 32px 24px; text-align: center;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">🏨 Al-Baith Resort</h1>
+                            <p style="color: #93c5fd; margin: 8px 0 0; font-size: 14px;">New Booking Confirmation</p>
+                        </div>
+                        <div style="padding: 32px 24px;">
+                            <h2 style="color: #1e3a5f; font-size: 20px; margin: 0 0 24px; border-bottom: 2px solid #e5e7eb; padding-bottom: 12px;">Booking Details</h2>
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="padding: 10px 0; color: #6b7280; font-size: 14px; width: 140px;">Guest Name</td>
+                                    <td style="padding: 10px 0; color: #111827; font-size: 14px; font-weight: 600;">${name}</td>
+                                </tr>
+                                <tr style="background: #f9fafb;">
+                                    <td style="padding: 10px 8px; color: #6b7280; font-size: 14px;">Email</td>
+                                    <td style="padding: 10px 8px; color: #111827; font-size: 14px;">${email}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 0; color: #6b7280; font-size: 14px;">Phone</td>
+                                    <td style="padding: 10px 0; color: #111827; font-size: 14px; font-weight: 600;">${phone}</td>
+                                </tr>
+                                <tr style="background: #f9fafb;">
+                                    <td style="padding: 10px 8px; color: #6b7280; font-size: 14px;">Room Type</td>
+                                    <td style="padding: 10px 8px; color: #111827; font-size: 14px; font-weight: 600;">${room_type}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px 0; color: #6b7280; font-size: 14px;">Check-in</td>
+                                    <td style="padding: 10px 0; color: #111827; font-size: 14px; font-weight: 600;">📅 ${check_in}</td>
+                                </tr>
+                                <tr style="background: #f9fafb;">
+                                    <td style="padding: 10px 8px; color: #6b7280; font-size: 14px;">Check-out</td>
+                                    <td style="padding: 10px 8px; color: #111827; font-size: 14px; font-weight: 600;">📅 ${check_out}</td>
+                                </tr>
+                            </table>
+                            <div style="margin-top: 24px; padding: 16px 20px; background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 10px; border-left: 4px solid #2563eb;">
+                                <p style="margin: 0; color: #6b7280; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px;">Total Amount</p>
+                                <p style="margin: 4px 0 0; color: #1e3a5f; font-size: 28px; font-weight: 700;">₹${price}</p>
+                            </div>
+                        </div>
+                        <div style="padding: 20px 24px; background: #f3f4f6; text-align: center; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0; color: #9ca3af; font-size: 12px;">Booking ID: ${bookingId}</p>
+                            <p style="margin: 6px 0 0; color: #9ca3af; font-size: 11px;">This is an automated notification from Al-Baith Resort booking system.</p>
+                        </div>
+                    </div>
+                `,
+            });
+            console.log('[API] Email send response - data:', JSON.stringify(emailData));
+            if (emailError) {
+                console.error('[API] Resend returned error:', JSON.stringify(emailError));
+            } else {
+                console.log('[API] Email notification sent successfully');
+            }
+        } catch (emailCatchError: any) {
+            // Don't fail the booking if email fails
+            console.error('[API] Email notification failed (booking still saved):', emailCatchError.message, JSON.stringify(emailCatchError));
+        }
+
         return res.status(200).json({
             success: true,
             message: 'Booking completed successfully',
