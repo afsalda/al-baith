@@ -173,35 +173,31 @@ export default async function handler(
         // Send emails sequentially to debug delivery issues
         console.log('[API] 1. Sending Admin Notification to albaith.booking@gmail.com...');
         try {
+            // Simplified Admin Email to reduce spam filtering
+            const bookingTime = new Date().toLocaleTimeString();
             const { data: adminData, error: adminError } = await resend.emails.send({
                 from: 'Al-Baith Resort <onboarding@resend.dev>',
                 to: 'albaith.booking@gmail.com',
-                subject: `🏨 Subscription / Booking Request - ${name} | ${room_type}`,
+                subject: `🔔 NEW BOOKING: ${name} [${bookingTime}]`,
+                text: `New Booking Request\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nRoom: ${room_type}\nDates: ${check_in} to ${check_out}\nGuests: ${guests}\nPrice: ₹${totalPrice.toLocaleString()}\n\nBooking ID: ${bookingId}`,
                 html: `
-                        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
-                            <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); padding: 32px 24px; text-align: center;">
-                                <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">New Booking Request</h1>
-                                <p style="color: #93c5fd; margin: 8px 0 0; font-size: 14px;">Customer Details Enclosed</p>
-                            </div>
-                            <div style="padding: 32px 24px;">
-                                <table style="width: 100%; border-collapse: collapse;">
-                                    <tr><td style="padding: 10px 0; color: #6b7280; font-size: 14px; width: 140px;">Guest Name</td><td style="padding: 10px 0; color: #111827; font-size: 14px; font-weight: 600;">${name}</td></tr>
-                                    <tr style="background: #f9fafb;"><td style="padding: 10px 8px; color: #6b7280; font-size: 14px;">Email</td><td style="padding: 10px 8px; color: #111827; font-size: 14px;"><a href="mailto:${email}" style="color: #2563eb; text-decoration: none;">${email}</a></td></tr>
-                                    <tr><td style="padding: 10px 0; color: #6b7280; font-size: 14px;">Phone</td><td style="padding: 10px 0; color: #111827; font-size: 14px; font-weight: 600;">${phone}</td></tr>
-                                    <tr style="background: #f9fafb;"><td style="padding: 10px 8px; color: #6b7280; font-size: 14px;">Room Type</td><td style="padding: 10px 8px; color: #111827; font-size: 14px; font-weight: 600;">${room_type}</td></tr>
-                                    <tr><td style="padding: 10px 0; color: #6b7280; font-size: 14px;">Check-in</td><td style="padding: 10px 0; color: #111827; font-size: 14px; font-weight: 600;">📅 ${check_in}</td></tr>
-                                    <tr style="background: #f9fafb;"><td style="padding: 10px 8px; color: #6b7280; font-size: 14px;">Check-out</td><td style="padding: 10px 8px; color: #111827; font-size: 14px; font-weight: 600;">📅 ${check_out}</td></tr>
-                                    <tr><td style="padding: 10px 0; color: #6b7280; font-size: 14px;">Guests</td><td style="padding: 10px 0; color: #111827; font-size: 14px; font-weight: 600;">${guests}</td></tr>
-                                    <tr style="background: #f9fafb;"><td style="padding: 10px 8px; color: #6b7280; font-size: 14px;">Nights</td><td style="padding: 10px 8px; color: #111827; font-size: 14px; font-weight: 600;">${nights}</td></tr>
-                                    <tr><td style="padding: 10px 0; color: #6b7280; font-size: 14px;">Total Price</td><td style="padding: 10px 0; color: #111827; font-size: 18px; font-weight: 700;">₹${totalPrice.toLocaleString()}</td></tr>
-                                </table>
-                            </div>
-                            <div style="padding: 16px 24px; background: #f3f4f6; text-align: center; border-top: 1px solid #e5e7eb;">
-                                <p style="margin: 0; color: #9ca3af; font-size: 12px;">Booking ID: ${bookingId}</p>
-                                <p style="margin: 4px 0 0; color: #9ca3af; font-size: 11px;">System Notification</p>
-                            </div>
+                    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; max-width: 600px;">
+                        <h2 style="color: #2563eb; margin-top: 0;">New Booking Request</h2>
+                        <div style="background: #f9fafb; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                            <p style="margin: 5px 0;"><strong>Customer:</strong> ${name}</p>
+                            <p style="margin: 5px 0;"><strong>Email:</strong> ${email}</p>
+                            <p style="margin: 5px 0;"><strong>Phone:</strong> ${phone}</p>
                         </div>
-                    `,
+                        <div style="padding: 10px 0;">
+                            <p style="margin: 5px 0;"><strong>Room:</strong> ${room_type}</p>
+                            <p style="margin: 5px 0;"><strong>Dates:</strong> ${check_in} — ${check_out}</p>
+                            <p style="margin: 5px 0;"><strong>Guests:</strong> ${guests}</p>
+                            <p style="margin: 5px 0;"><strong>Total Price:</strong> <span style="font-size: 1.2em; font-weight: bold;">₹${totalPrice.toLocaleString()}</span></p>
+                        </div>
+                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+                        <p style="font-size: 12px; color: #6b7280;">Booking ID: ${bookingId} • Time: ${bookingTime}</p>
+                    </div>
+                `,
             });
 
             if (adminError) {
@@ -220,94 +216,62 @@ export default async function handler(
                 to: email,
                 subject: `✨ Booking Confirmed - Al-Baith Resort | ${room_type}`,
                 html: `
-                            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; background: #fffdf7; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.08); border: 1px solid #f0e6cc;">
+                    <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; background: #fffdf7; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.08); border: 1px solid #f0e6cc;">
 
-                                <!-- Header with Al-Baith Gold Branding -->
-                                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 48px 32px; text-align: center; position: relative;">
-                                    <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #B8860B, #FFD700, #FFF9C4, #FFD700, #B8860B);"></div>
-                                    <h1 style="color: #FFD700; margin: 0; font-size: 36px; font-weight: 700; letter-spacing: 4px; font-family: Georgia, 'Times New Roman', serif;">AL-BAITH</h1>
-                                    <p style="color: #d4af37; margin: 6px 0 0; font-size: 12px; letter-spacing: 6px; text-transform: uppercase;">Resort & Residences</p>
-                                    <div style="margin-top: 24px; padding: 12px 28px; display: inline-block; background: linear-gradient(135deg, #B8860B, #FFD700); border-radius: 50px;">
-                                        <span style="color: #1a1a2e; font-size: 15px; font-weight: 700; letter-spacing: 1px;">✓ BOOKING CONFIRMED</span>
-                                    </div>
-                                </div>
-
-                                <!-- Greeting -->
-                                <div style="padding: 36px 32px 0;">
-                                    <h2 style="color: #1a1a2e; font-size: 22px; margin: 0 0 8px; font-weight: 600;">Dear ${name},</h2>
-                                    <p style="color: #6b7280; font-size: 15px; margin: 0; line-height: 1.6;">Thank you for choosing Al-Baith Resort. Your reservation has been confirmed. We look forward to welcoming you and providing an exceptional experience.</p>
-                                </div>
-
-                                <!-- Booking Details Card -->
-                                <div style="padding: 28px 32px;">
-                                    <div style="background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e8dcc8; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
-                                        <div style="background: linear-gradient(135deg, #f8f0e0, #faf6ed); padding: 16px 20px; border-bottom: 1px solid #e8dcc8;">
-                                            <h3 style="color: #92640a; margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Reservation Details</h3>
-                                        </div>
-                                        <table style="width: 100%; border-collapse: collapse;">
-                                            <tr>
-                                                <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; width: 140px; border-bottom: 1px solid #f3f0e8;">Booking ID</td>
-                                                <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 700; font-family: 'Courier New', monospace; border-bottom: 1px solid #f3f0e8;">${bookingId}</td>
-                                            </tr>
-                                            <tr style="background: #fdfbf5;">
-                                                <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Room Type</td>
-                                                <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">${room_type}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Check-in</td>
-                                                <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">📅 ${formatDate(checkInDate)}</td>
-                                            </tr>
-                                            <tr style="background: #fdfbf5;">
-                                                <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Check-out</td>
-                                                <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">📅 ${formatDate(checkOutDate)}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Guests</td>
-                                                <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">${guests}</td>
-                                            </tr>
-                                            <tr style="background: #fdfbf5;">
-                                                <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Duration</td>
-                                                <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">${nights} night${nights > 1 ? 's' : ''}</td>
-                                            </tr>
-                                            <tr>
-                                                <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Rate / Night</td>
-                                                <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">₹${price.toLocaleString()}</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                    <div style="padding: 16px 24px; background: #f3f4f6; text-align: center; border-top: 1px solid #e5e7eb;">
-                                        <p style="margin: 0; color: #9ca3af; font-size: 12px;">Booking ID: ${bookingId}</p>
-                                    </div>
-                                </div>
-
-                                <!-- Important Info -->
-                                <div style="padding: 0 32px 28px;">
-                                    <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; border-left: 4px solid #B8860B;">
-                                        <h4 style="margin: 0 0 10px; color: #1a1a2e; font-size: 14px; font-weight: 700;">📋 Important Information</h4>
-                                        <ul style="margin: 0; padding: 0 0 0 18px; color: #6b7280; font-size: 13px; line-height: 1.8;">
-                                            <li>Check-in time: <strong>12:00 PM</strong></li>
-                                            <li>Check-out time: <strong>11:00 AM</strong></li>
-                                            <li>Please carry a valid photo ID for check-in</li>
-                                            <li>Free cancellation available (see our cancellation policy)</li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                                <!-- Contact -->
-                                <div style="padding: 0 32px 32px; text-align: center;">
-                                    <p style="color: #9ca3af; font-size: 13px; margin: 0;">Need help? Contact us at</p>
-                                    <a href="mailto:albaith.booking@gmail.com" style="color: #B8860B; font-size: 14px; font-weight: 600; text-decoration: none;">albaith.booking@gmail.com</a>
-                                </div>
-
-                                <!-- Footer -->
-                                <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 24px 32px; text-align: center;">
-                                    <div style="height: 2px; background: linear-gradient(90deg, transparent, #B8860B, #FFD700, #B8860B, transparent); margin-bottom: 16px;"></div>
-                                    <p style="color: #FFD700; margin: 0; font-size: 16px; letter-spacing: 3px; font-family: Georgia, 'Times New Roman', serif; font-weight: 600;">AL-BAITH RESORT</p>
-                                    <p style="color: #6b7280; margin: 8px 0 0; font-size: 11px; letter-spacing: 1px;">LUXURY • HOSPITALITY • EXCELLENCE</p>
-                                    <p style="color: #4b5563; margin: 12px 0 0; font-size: 10px;">© ${new Date().getFullYear()} Al-Baith Resort & Residences. All rights reserved.</p>
-                                </div>
+                        <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 48px 32px; text-align: center; position: relative;">
+                            <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #B8860B, #FFD700, #FFF9C4, #FFD700, #B8860B);"></div>
+                            <h1 style="color: #FFD700; margin: 0; font-size: 36px; font-weight: 700; letter-spacing: 4px; font-family: Georgia, 'Times New Roman', serif;">AL-BAITH</h1>
+                            <p style="color: #d4af37; margin: 6px 0 0; font-size: 12px; letter-spacing: 6px; text-transform: uppercase;">Resort & Residences</p>
+                            <div style="margin-top: 24px; padding: 12px 28px; display: inline-block; background: linear-gradient(135deg, #B8860B, #FFD700); border-radius: 50px;">
+                                <span style="color: #1a1a2e; font-size: 15px; font-weight: 700; letter-spacing: 1px;">✓ BOOKING CONFIRMED</span>
                             </div>
-                    `,
+                        </div>
+
+                        <div style="padding: 36px 32px 0;">
+                            <h2 style="color: #1a1a2e; font-size: 22px; margin: 0 0 8px; font-weight: 600;">Dear ${name},</h2>
+                            <p style="color: #6b7280; font-size: 15px; margin: 0; line-height: 1.6;">Thank you for choosing Al-Baith Resort. Your reservation has been confirmed. We look forward to welcoming you and providing an exceptional experience.</p>
+                        </div>
+
+                        <div style="padding: 28px 32px;">
+                            <div style="background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e8dcc8; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
+                                <div style="background: linear-gradient(135deg, #f8f0e0, #faf6ed); padding: 16px 20px; border-bottom: 1px solid #e8dcc8;">
+                                    <h3 style="color: #92640a; margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Reservation Details</h3>
+                                </div>
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; width: 140px; border-bottom: 1px solid #f3f0e8;">Booking ID</td>
+                                        <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 700; font-family: 'Courier New', monospace; border-bottom: 1px solid #f3f0e8;">${bookingId}</td>
+                                    </tr>
+                                    <tr style="background: #fdfbf5;">
+                                        <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Room Type</td>
+                                        <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">${room_type}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Check-in</td>
+                                        <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">📅 ${formatDate(checkInDate)}</td>
+                                    </tr>
+                                    <tr style="background: #fdfbf5;">
+                                        <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Check-out</td>
+                                        <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">📅 ${formatDate(checkOutDate)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Guests</td>
+                                        <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">${guests}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Rate / Night</td>
+                                        <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">₹${price.toLocaleString()}</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div style="padding: 0 32px 32px; text-align: center;">
+                            <p style="color: #9ca3af; font-size: 13px; margin: 0;">Need help? Contact us at</p>
+                            <a href="mailto:albaith.booking@gmail.com" style="color: #B8860B; font-size: 14px; font-weight: 600; text-decoration: none;">albaith.booking@gmail.com</a>
+                        </div>
+                    </div>
+                `,
             });
 
             if (customerError) {
