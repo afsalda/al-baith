@@ -48,7 +48,13 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex flex-col">
                 <span className="font-semibold text-xs text-gray-500">Email</span>
-                <a href="mailto:albaith.booking@gmail.com" className="underline hover:text-amber-800 transition-colors">albaith.booking@gmail.com</a>
+                <a
+                  href="mailto:albaith.booking@gmail.com"
+                  className="underline hover:text-amber-800 transition-colors font-medium break-all"
+                  rel="noopener noreferrer"
+                >
+                  albaith.booking@gmail.com
+                </a>
               </li>
             </ul>
 
@@ -56,12 +62,12 @@ const Footer: React.FC = () => {
 
           <div className="space-y-4">
             <h5 className="font-bold">Location</h5>
-            <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm h-48">
+            <div className="rounded-lg overflow-hidden border border-gray-200 shadow-sm h-64 md:h-48 w-full relative bg-gray-100">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d62882.84579050575!2d76.271367!3d9.9191404!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b0873f4e02b7091%3A0x14f8d912261157fd!2sAl-Baith%20Resthouse!5e0!3m2!1sen!2sin!4v1770457277502!5m2!1sen!2sin"
                 width="100%"
                 height="100%"
-                style={{ border: 0 }}
+                style={{ border: 0, position: 'absolute', inset: 0 }}
                 allowFullScreen={true}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
