@@ -11,8 +11,8 @@ const insforge = createClient({
     anonKey: INSFORGE_KEY,
 });
 
-// Resend API Key
-const RESEND_KEY = process.env.RESEND_API_KEY || 're_dEtH68EH_635wtc8N9si147bfue1Matt1versel';
+// Hotel's Resend Account Key
+const RESEND_KEY = process.env.RESEND_API_KEY || 're_dEtH68EH_635wtc8N9si147bfue1Matt1';
 const resend = new Resend(RESEND_KEY);
 
 console.log('[API] Initializing Resend with key:', RESEND_KEY ? `${RESEND_KEY.substring(0, 5)}...` : 'undefined');
@@ -171,14 +171,15 @@ export default async function handler(
         const formatDate = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         // Send emails sequentially to debug delivery issues
-        const adminEmailRecipient = 'muhammedafsalda@gmail.com'; // Resend free tier verified email
-        console.log(`[API] 1. Sending Admin Notification to ${adminEmailRecipient}...`);
+        // Using the Hotel's verified email account
+        const HOTEL_ADMIN_EMAIL = 'albaith.booking@gmail.com';
+
+        console.log(`[API] 1. Sending Admin Notification to ${HOTEL_ADMIN_EMAIL}...`);
         try {
-            // Simplified Admin Email to reduce spam filtering
             const bookingTime = new Date().toLocaleTimeString();
             const { data: adminData, error: adminError } = await resend.emails.send({
                 from: 'Al-Baith Resort <onboarding@resend.dev>',
-                to: adminEmailRecipient,
+                to: HOTEL_ADMIN_EMAIL,
                 subject: `🔔 NEW BOOKING: ${name} [${bookingTime}]`,
                 text: `New Booking Request\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone}\nRoom: ${room_type}\nDates: ${check_in} to ${check_out}\nGuests: ${guests}\nPrice: ₹${totalPrice.toLocaleString()}\n\nBooking ID: ${bookingId}`,
                 html: `
@@ -210,14 +211,15 @@ export default async function handler(
             console.error('[API] ❌ Admin email CRASHED:', err);
         }
 
-        console.log(`[API] 2. Sending Customer Confirmation to ${email} (with BCC to Admin)...`);
+        console.log(`[API] 2. Sending Customer Confirmation to ${email}...`);
         try {
-            // Note: On free tier, 'to' must be 'muhammedafsalda@gmail.com' or verified domain. 
-            // If 'email' is 'muhammedafsalda@gmail.com', it works. If not, it fails.
+            // Note: If on Free Tier, this will only succeed if 'email' is 'albaith.booking@gmail.com'
+            // or if the domain is verified.
             const { data: customerData, error: customerError } = await resend.emails.send({
                 from: 'Al-Baith Resort <onboarding@resend.dev>',
-                to: email, // This will fail if not verified, but we catch it.
-                bcc: adminEmailRecipient, // ⚠️ BACKUP: Ensure admin gets a copy!
+                to: email,
+                // BCC to admin as backup, ONLY if recipient isn't admin
+                bcc: email === HOTEL_ADMIN_EMAIL ? undefined : HOTEL_ADMIN_EMAIL,
                 subject: `✨ Booking Confirmed - Al-Baith Resort | ${room_type} #${bookingId.substring(0, 4)}`,
                 html: `
                     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; background: #fffdf7; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.08); border: 1px solid #f0e6cc;">
@@ -281,7 +283,7 @@ export default async function handler(
             if (customerError) {
                 console.error('[API] ❌ Customer email FAILED:', JSON.stringify(customerError));
             } else {
-                console.log('[API] ✅ Customer confirmation sent (BCC included):', JSON.stringify(customerData));
+                console.log('[API] ✅ Customer confirmation sent:', JSON.stringify(customerData));
             }
         } catch (err) {
             console.error('[API] ❌ Customer email CRASHED:', err);
