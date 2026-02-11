@@ -46,6 +46,10 @@ const Footer: React.FC = () => {
                 <span className="font-semibold text-xs text-gray-500">Call / WhatsApp</span>
                 <a href="https://wa.me/919447290936" target="_blank" rel="noopener noreferrer" className="hover:underline hover:text-amber-800 transition-colors">9447290936</a>
               </li>
+              <li className="flex flex-col">
+                <span className="font-semibold text-xs text-gray-500">Email</span>
+                <a href="mailto:albaith.booking@gmail.com" className="hover:underline hover:text-amber-800 transition-colors">albaith.booking@gmail.com</a>
+              </li>
             </ul>
 
           </div>

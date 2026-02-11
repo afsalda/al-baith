@@ -102,7 +102,7 @@ const HelpCenterPage: React.FC = () => {
                         </div>
                         <div className="flex justify-between items-center pb-3 border-b border-neutral-200">
                             <span className="text-neutral-500 font-medium">Email</span>
-                            <a href="mailto:contact@al-baith.com" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">contact@al-baith.com</a>
+                            <a href="mailto:albaith.booking@gmail.com" className="text-neutral-900 font-semibold hover:text-amber-800 hover:underline">albaith.booking@gmail.com</a>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-neutral-500 font-medium">Support Hours</span>
