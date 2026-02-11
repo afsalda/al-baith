@@ -11,7 +11,7 @@ const insforge = createClient({
     anonKey: INSFORGE_KEY,
 });
 
-// Use environment variable for Resend API key (configured in Vercel), with fallback for local dev
+// Resend API Key
 const RESEND_KEY = process.env.RESEND_API_KEY || 're_GAj1ujqY_6YKnke9bZ72wmyLEi7ZpWcqF';
 const resend = new Resend(RESEND_KEY);
 
@@ -168,16 +168,17 @@ export default async function handler(
         const checkOutDate = new Date(check_out);
         const nights = Math.max(1, Math.ceil((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24)));
         const totalPrice = price * nights;
+        const formatDate = (d: Date) => d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
         // Send email (non-blocking — booking is already saved)
         try {
-            console.log('[API] Sending admin notification email...');
+            console.log('[API] Preparing to send emails...');
 
-            // Send single admin notification email with all details
-            const { data: emailData, error: emailError } = await resend.emails.send({
+            // 1. Admin notification email
+            const adminEmailPromise = resend.emails.send({
                 from: 'Al-Baith Resort <onboarding@resend.dev>',
                 to: 'albaith.booking@gmail.com',
-                subject: `🏨 Booking Request - ${name} | ${room_type}`,
+                subject: `🏨 Subscription / Booking Request - ${name} | ${room_type}`,
                 html: `
                     <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
                         <div style="background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%); padding: 32px 24px; text-align: center;">
@@ -205,10 +206,122 @@ export default async function handler(
                 `,
             });
 
-            if (emailError) {
-                console.error('[API] Admin email error:', JSON.stringify(emailError));
+            // 2. Customer confirmation email
+            const customerEmailPromise = resend.emails.send({
+                from: 'Al-Baith Resort <onboarding@resend.dev>',
+                to: email,
+                subject: `✨ Booking Confirmed - Al-Baith Resort | ${room_type}`,
+                html: `
+                        <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 640px; margin: 0 auto; background: #fffdf7; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,0,0,0.08); border: 1px solid #f0e6cc;">
+
+                            <!-- Header with Al-Baith Gold Branding -->
+                            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); padding: 48px 32px; text-align: center; position: relative;">
+                                <div style="position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #B8860B, #FFD700, #FFF9C4, #FFD700, #B8860B);"></div>
+                                <h1 style="color: #FFD700; margin: 0; font-size: 36px; font-weight: 700; letter-spacing: 4px; font-family: Georgia, 'Times New Roman', serif;">AL-BAITH</h1>
+                                <p style="color: #d4af37; margin: 6px 0 0; font-size: 12px; letter-spacing: 6px; text-transform: uppercase;">Resort & Residences</p>
+                                <div style="margin-top: 24px; padding: 12px 28px; display: inline-block; background: linear-gradient(135deg, #B8860B, #FFD700); border-radius: 50px;">
+                                    <span style="color: #1a1a2e; font-size: 15px; font-weight: 700; letter-spacing: 1px;">✓ BOOKING CONFIRMED</span>
+                                </div>
+                            </div>
+
+                            <!-- Greeting -->
+                            <div style="padding: 36px 32px 0;">
+                                <h2 style="color: #1a1a2e; font-size: 22px; margin: 0 0 8px; font-weight: 600;">Dear ${name},</h2>
+                                <p style="color: #6b7280; font-size: 15px; margin: 0; line-height: 1.6;">Thank you for choosing Al-Baith Resort. Your reservation has been confirmed. We look forward to welcoming you and providing an exceptional experience.</p>
+                            </div>
+
+                            <!-- Booking Details Card -->
+                            <div style="padding: 28px 32px;">
+                                <div style="background: #ffffff; border-radius: 12px; overflow: hidden; border: 1px solid #e8dcc8; box-shadow: 0 2px 12px rgba(0,0,0,0.04);">
+                                    <div style="background: linear-gradient(135deg, #f8f0e0, #faf6ed); padding: 16px 20px; border-bottom: 1px solid #e8dcc8;">
+                                        <h3 style="color: #92640a; margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700;">Reservation Details</h3>
+                                    </div>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr>
+                                            <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; width: 140px; border-bottom: 1px solid #f3f0e8;">Booking ID</td>
+                                            <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 700; font-family: 'Courier New', monospace; border-bottom: 1px solid #f3f0e8;">${bookingId}</td>
+                                        </tr>
+                                        <tr style="background: #fdfbf5;">
+                                            <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Room Type</td>
+                                            <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">${room_type}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Check-in</td>
+                                            <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">📅 ${formatDate(checkInDate)}</td>
+                                        </tr>
+                                        <tr style="background: #fdfbf5;">
+                                            <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Check-out</td>
+                                            <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">📅 ${formatDate(checkOutDate)}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Guests</td>
+                                            <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">${guests}</td>
+                                        </tr>
+                                        <tr style="background: #fdfbf5;">
+                                            <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Duration</td>
+                                            <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">${nights} night${nights > 1 ? 's' : ''}</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 14px 20px; color: #9ca3af; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #f3f0e8;">Rate / Night</td>
+                                            <td style="padding: 14px 20px; color: #1a1a2e; font-size: 14px; font-weight: 600; border-bottom: 1px solid #f3f0e8;">₹${price.toLocaleString()}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div style="padding: 16px 24px; background: #f3f4f6; text-align: center; border-top: 1px solid #e5e7eb;">
+                                    <p style="margin: 0; color: #9ca3af; font-size: 12px;">Booking ID: ${bookingId}</p>
+                                </div>
+                            </div>
+
+                            <!-- Important Info -->
+                            <div style="padding: 0 32px 28px;">
+                                <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; border-left: 4px solid #B8860B;">
+                                    <h4 style="margin: 0 0 10px; color: #1a1a2e; font-size: 14px; font-weight: 700;">📋 Important Information</h4>
+                                    <ul style="margin: 0; padding: 0 0 0 18px; color: #6b7280; font-size: 13px; line-height: 1.8;">
+                                        <li>Check-in time: <strong>12:00 PM</strong></li>
+                                        <li>Check-out time: <strong>11:00 AM</strong></li>
+                                        <li>Please carry a valid photo ID for check-in</li>
+                                        <li>Free cancellation available (see our cancellation policy)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Contact -->
+                            <div style="padding: 0 32px 32px; text-align: center;">
+                                <p style="color: #9ca3af; font-size: 13px; margin: 0;">Need help? Contact us at</p>
+                                <a href="mailto:albaith.booking@gmail.com" style="color: #B8860B; font-size: 14px; font-weight: 600; text-decoration: none;">albaith.booking@gmail.com</a>
+                            </div>
+
+                            <!-- Footer -->
+                            <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); padding: 24px 32px; text-align: center;">
+                                <div style="height: 2px; background: linear-gradient(90deg, transparent, #B8860B, #FFD700, #B8860B, transparent); margin-bottom: 16px;"></div>
+                                <p style="color: #FFD700; margin: 0; font-size: 16px; letter-spacing: 3px; font-family: Georgia, 'Times New Roman', serif; font-weight: 600;">AL-BAITH RESORT</p>
+                                <p style="color: #6b7280; margin: 8px 0 0; font-size: 11px; letter-spacing: 1px;">LUXURY • HOSPITALITY • EXCELLENCE</p>
+                                <p style="color: #4b5563; margin: 12px 0 0; font-size: 10px;">© ${new Date().getFullYear()} Al-Baith Resort & Residences. All rights reserved.</p>
+                            </div>
+                        </div>
+                `,
+            });
+
+            // Wait for both emails in parallel
+            console.log('[API] Awaiting email results...');
+            const results = await Promise.allSettled([adminEmailPromise, customerEmailPromise]);
+            const adminResult = results[0];
+            const customerResult = results[1];
+
+            if (adminResult.status === 'fulfilled') {
+                const { data: aData, error: aErr } = adminResult.value;
+                if (aErr) console.error('[API] Admin email error:', JSON.stringify(aErr));
+                else console.log('[API] Admin notification sent:', JSON.stringify(aData));
             } else {
-                console.log('[API] Admin notification sent successfully:', JSON.stringify(emailData));
+                console.error('[API] Admin email failed:', adminResult.reason);
+            }
+
+            if (customerResult.status === 'fulfilled') {
+                const { data: cData, error: cErr } = customerResult.value;
+                if (cErr) console.error('[API] Customer email error:', JSON.stringify(cErr));
+                else console.log('[API] Customer confirmation sent to', email, ':', JSON.stringify(cData));
+            } else {
+                console.error('[API] Customer email failed:', customerResult.reason);
             }
 
         } catch (emailCatchError: any) {
