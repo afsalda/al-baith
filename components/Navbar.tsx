@@ -145,26 +145,6 @@ const Navbar: React.FC<NavbarProps> = ({ user, setUser, onOpenLogin }) => {
               <span className={`text-[10px] md:text-sm lg:text-base font-semibold ${currentView === 'experiences' ? 'text-black' : 'text-neutral-600 group-hover:text-black'} transition hidden md:inline`}>Experiences</span>
               {currentView === 'experiences' && <div className="absolute -bottom-0 left-0 w-full h-0.5 md:h-1 bg-black rounded-full"></div>}
             </Link>
-
-            {/* Services */}
-            <Link
-              to="/services"
-              className="flex flex-col items-center gap-1 cursor-pointer group py-2 relative"
-            >
-              <div className="relative">
-                {/* Service Bell Icon */}
-                {/* Service Bell Icon - 3D Style */}
-                {/* Service Bell Icon - 3D Style */}
-                <img
-                  src="/icons/bell-3d.png"
-                  alt="Services"
-                  className="w-5 h-5 md:w-8 md:h-8 object-contain"
-                />
-                {/* NEW Badge */}
-                <div className="absolute -top-1 -right-2 bg-[#4A5568] text-white text-[6px] md:text-[8px] font-bold px-1 md:px-1.5 py-0.5 rounded-full">NEW</div>
-              </div>
-              <span className={`text-[10px] md:text-sm lg:text-base font-semibold ${currentView === 'services' ? 'text-black' : 'text-neutral-600 group-hover:text-black'} transition hidden md:inline`}>Services</span>
-            </Link>
           </div>
 
 

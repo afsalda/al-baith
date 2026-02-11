@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Compass, Bell } from 'lucide-react';
+import { Home, Compass } from 'lucide-react';
 
 const MobileNav: React.FC = () => {
     const location = useLocation();
@@ -8,7 +8,6 @@ const MobileNav: React.FC = () => {
     const navItems = [
         { label: 'Explore', path: '/', icon: <Home className="w-6 h-6" /> },
         { label: 'Experience', path: '/experiences', icon: <Compass className="w-6 h-6" /> },
-        { label: 'Services', path: '/services', icon: <Bell className="w-6 h-6" /> },
     ];
 
     const isRoomPage = location.pathname.startsWith('/room/');

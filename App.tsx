@@ -7,7 +7,6 @@ import MobileNav from './components/MobileNav';
 import Footer from './components/Footer';
 import HomePage from './pages/HomePage';
 import ExperiencePage from './pages/ExperiencePage';
-import ServicesPage from './pages/ServicesPage';
 import RoomDetailsPage from './pages/RoomDetailsPage';
 import BookingPage from './pages/BookingPage';
 import ProfilePage from './pages/ProfilePage';
@@ -83,7 +82,6 @@ const App: React.FC = () => {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/experiences" element={<ExperiencePage />} />
-        <Route path="/services" element={<ServicesPage />} />
         <Route path="/room/:id" element={<RoomDetailsPage />} />
         <Route path="/booking/:id" element={<BookingPage />} />
         <Route path="/profile" element={<ProfilePage user={user} onOpenLogin={() => openLogin('login')} />} />
