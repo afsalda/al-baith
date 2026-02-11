@@ -11,8 +11,11 @@ const insforge = createClient({
     anonKey: INSFORGE_KEY,
 });
 
-// Use environment variable for Resend API key (configured in Vercel)
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Use environment variable for Resend API key (configured in Vercel), with fallback for local dev
+const RESEND_KEY = process.env.RESEND_API_KEY || 're_GAj1ujqY_6YKnke9bZ72wmyLEi7ZpWcqF';
+const resend = new Resend(RESEND_KEY);
+
+console.log('[API] Initializing Resend with key:', RESEND_KEY ? `${RESEND_KEY.substring(0, 5)}...` : 'undefined');
 
 export default async function handler(
     req: VercelRequest,
