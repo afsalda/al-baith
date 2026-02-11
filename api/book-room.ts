@@ -11,8 +11,8 @@ const insforge = createClient({
     anonKey: INSFORGE_KEY,
 });
 
-// Hardcoded for debugging - same approach as InsForge credentials above
-const resend = new Resend('re_GAj1ujqY_6YKnke9bZ72wmyLEi7ZpWcqF');
+// Use environment variable for Resend API key (configured in Vercel)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export default async function handler(
     req: VercelRequest,
