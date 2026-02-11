@@ -27,7 +27,16 @@ const Footer: React.FC = () => {
             <ul className="space-y-2 text-sm text-gray-600">
               <li className="hover:underline cursor-pointer">Facebook</li>
               <li className="hover:underline cursor-pointer">Twitter</li>
-              <li className="hover:underline cursor-pointer">Instagram</li>
+              <li>
+                <a
+                  href="https://www.instagram.com/al.baithrooms?igsh=MXYwMXhyYzZ4anY0ZA%3D%3D&utm_source=qr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline cursor-pointer hover:text-amber-800 transition-colors"
+                >
+                  Instagram
+                </a>
+              </li>
             </ul>
           </div>
 
