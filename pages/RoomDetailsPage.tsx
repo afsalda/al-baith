@@ -4,6 +4,7 @@ import { MapPin, Star, Heart, Share2, Wifi, Tv, Wind, Coffee, Users, Home, Calen
 import { motion } from 'framer-motion';
 import { ROOMS_DATA, APARTMENT_TYPES } from '../constants';
 import CompactCalendar from '../components/CompactCalendar';
+import { SplitReveal, SlideUp } from '../components/ui/gsap-text';
 
 interface RoomDetails {
     id: string;
@@ -201,7 +202,7 @@ const RoomDetailsPage: React.FC = () => {
             <div className="max-w-[1120px] mx-auto px-6 md:px-10 pt-6">
                 {/* Title and Actions */}
                 <div className="mb-6">
-                    <h1 className="text-2xl md:text-3xl font-semibold mb-2">{room.name}</h1>
+                    <SplitReveal text={room.name} className="text-2xl md:text-3xl font-semibold mb-2" duration={0.7} stagger={0.03} />
                     <div className="flex flex-wrap items-center justify-between gap-4">
                         <div className="flex items-center gap-4 text-sm">
                             <div className="flex items-center gap-1">
@@ -372,7 +373,7 @@ const RoomDetailsPage: React.FC = () => {
 
                         {/* Amenities */}
                         <div className="py-8 border-b">
-                            <h2 className="text-2xl font-semibold mb-6">What this place offers</h2>
+                            <SlideUp scrollTrigger><h2 className="text-2xl font-semibold mb-6">What this place offers</h2></SlideUp>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {room.amenities.map((amenity, index) => (
                                     <div key={index} className="flex items-center gap-4 py-3">
@@ -385,7 +386,7 @@ const RoomDetailsPage: React.FC = () => {
 
                         {/* Things to know */}
                         <div className="py-8 border-b">
-                            <h2 className="text-2xl font-semibold mb-6">Things to know</h2>
+                            <SlideUp scrollTrigger><h2 className="text-2xl font-semibold mb-6">Things to know</h2></SlideUp>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <h3 className="font-semibold mb-2">House rules</h3>

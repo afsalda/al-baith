@@ -7,6 +7,7 @@ import { Room } from "../types";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Separator } from "./ui/separator";
+import { SplitReveal, WordReveal } from "./ui/gsap-text";
 
 // Room interfaces removed, now imported from ../types
 
@@ -143,22 +144,20 @@ const Rooms: React.FC<RoomsProps> = ({
         <section className="py-16 md:py-24 bg-white">
             <div className="container mx-auto px-4 md:px-8">
                 <div className="mb-12 text-center">
-                    <motion.h1
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1.2, ease: "easeOut" }}
+                    <SplitReveal
+                        text={heading}
                         className="mb-4 text-3xl font-bold tracking-tight md:text-5xl"
-                    >
-                        {heading}
-                    </motion.h1>
-                    <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ duration: 1.2, delay: 0.3, ease: "easeOut" }}
+                        scrollTrigger
+                        duration={0.9}
+                        stagger={0.04}
+                    />
+                    <WordReveal
+                        text={subheading}
                         className="text-lg text-gray-600 max-w-2xl mx-auto"
-                    >
-                        {subheading}
-                    </motion.p>
+                        scrollTrigger
+                        delay={0.4}
+                        stagger={0.06}
+                    />
                 </div>
 
                 <div
