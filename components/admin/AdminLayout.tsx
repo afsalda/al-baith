@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BedDouble, CalendarDays, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, BedDouble, CalendarDays, Settings, LogOut, Menu, X, Calendar } from 'lucide-react';
 
 const AdminLayout: React.FC = () => {
     const navigate = useNavigate();
@@ -15,6 +15,7 @@ const AdminLayout: React.FC = () => {
 
     const navItems = [
         { path: '/admin/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
+        { path: '/admin/calendar', label: 'Calendar', icon: <Calendar size={20} /> },
         { path: '/admin/rooms', label: 'Rooms', icon: <BedDouble size={20} /> },
         { path: '/admin/bookings', label: 'Bookings', icon: <CalendarDays size={20} /> },
         { path: '/admin/settings', label: 'Settings', icon: <Settings size={20} /> },

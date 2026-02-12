@@ -15,6 +15,7 @@ import HelpCenterPage from './pages/HelpCenterPage';
 import CancellationPolicyPage from './pages/CancellationPolicyPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminCalendarPage from './pages/admin/AdminCalendarPage';
 import AdminRoomsPage from './pages/admin/AdminRoomsPage';
 import AdminBookingsPage from './pages/admin/AdminBookingsPage';
 import AdminSettingsPage from './pages/admin/AdminSettingsPage';
@@ -63,6 +64,7 @@ const App: React.FC = () => {
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+            <Route path="/admin/calendar" element={<AdminCalendarPage />} />
             <Route path="/admin/rooms" element={<AdminRoomsPage />} />
             <Route path="/admin/bookings" element={<AdminBookingsPage />} />
             <Route path="/admin/settings" element={<AdminSettingsPage />} />
