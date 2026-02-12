@@ -1,6 +1,6 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { insforge } from '../lib/insforge';
+import { sql } from '../lib/neon';
 
 export default async function handler(
     request: VercelRequest,
@@ -24,54 +24,41 @@ export default async function handler(
         return response.status(405).json({ error: 'Method not allowed' });
     }
 
-    // Check InsForge client
-    if (!insforge) {
-        console.error('InsForge client not initialized');
-        return response.status(500).json({ error: 'Database configuration error' });
-    }
-
     try {
-        const { data: bookings, error } = await insforge.database
-            .from('bookings')
-            .select(`
-                id,
-                checkIn,
-                checkOut,
-                status,
-                totalAmount,
-                bookingTime,
-                createdAt,
-                user:users (
-                    name,
-                    email,
-                    phone
-                ),
-                room:rooms (
-                    id,
-                    roomType,
-                    price
-                )
-            `)
-            .order('createdAt', { ascending: false });
-
-        if (error) {
-            console.error('Fetch Bookings Error:', error);
-            throw error;
-        }
+        const bookings = await sql`
+            SELECT 
+                b.id,
+                b."checkIn",
+                b."checkOut",
+                b.status,
+                b."totalAmount",
+                b."bookingTime",
+                b."createdAt",
+                u.name AS user_name,
+                u.email AS user_email,
+                u.phone AS user_phone,
+                r.id AS room_id,
+                r."roomType" AS room_type,
+                r.price AS room_price
+            FROM bookings b
+            LEFT JOIN users u ON b."userId" = u.id
+            LEFT JOIN rooms r ON b."roomId" = r.id
+            ORDER BY b."createdAt" DESC
+        `;
 
         // Map to frontend interface
         const transformedBookings = (bookings || []).map((b: any) => ({
             id: b.id.toString(),
-            customerName: b.user?.name || 'Unknown',
-            email: b.user?.email || 'N/A',
-            phone: b.user?.phone || 'N/A',
+            customerName: b.user_name || 'Unknown',
+            email: b.user_email || 'N/A',
+            phone: b.user_phone || 'N/A',
             checkIn: b.checkIn,
             checkOut: b.checkOut,
-            roomType: b.room?.roomType || 'Unknown Room',
-            roomId: b.room?.id ? b.room.id.toString() : 'unknown',
-            guests: 2, // Minimal data
-            totalAmount: b.totalAmount || b.room?.price || 0,
-            paymentStatus: 'paid', // Hardcoded as placeholder
+            roomType: b.room_type || 'Unknown Room',
+            roomId: b.room_id ? b.room_id.toString() : 'unknown',
+            guests: 2,
+            totalAmount: b.totalAmount || b.room_price || 0,
+            paymentStatus: 'paid',
             bookingStatus: b.status || 'pending',
             bookingTime: b.bookingTime || b.createdAt,
             createdAt: b.createdAt

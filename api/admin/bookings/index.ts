@@ -1,6 +1,6 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { insforge } from '../../../lib/insforge';
+import { sql } from '../../../lib/neon';
 import { verifyToken, handleAuthError } from '../../_lib/auth.js';
 
 export default async function handler(
@@ -27,51 +27,38 @@ export default async function handler(
         return handleAuthError(response);
     }
 
-    // Check InsForge client
-    if (!insforge) {
-        console.error('InsForge client not initialized');
-        return response.status(500).json({ error: 'Database configuration error' });
-    }
-
     try {
         if (request.method === 'GET') {
-            const { data: bookings, error } = await insforge.database
-                .from('bookings')
-                .select(`
-                    id,
-                    checkIn,
-                    checkOut,
-                    status,
-                    bookingTime,
-                    createdAt,
-                    user:users (
-                        name,
-                        email,
-                        phone
-                    ),
-                     room:rooms (
-                        roomType
-                    )
-                `)
-                .order('createdAt', { ascending: false });
-
-            if (error) {
-                console.error('Fetch Bookings Error:', error);
-                throw error;
-            }
+            const bookings = await sql`
+                SELECT 
+                    b.id,
+                    b."checkIn",
+                    b."checkOut",
+                    b.status,
+                    b."totalAmount",
+                    b."bookingTime",
+                    b."createdAt",
+                    u.name AS user_name,
+                    u.email AS user_email,
+                    u.phone AS user_phone,
+                    r."roomType" AS room_type
+                FROM bookings b
+                LEFT JOIN users u ON b."userId" = u.id
+                LEFT JOIN rooms r ON b."roomId" = r.id
+                ORDER BY b."createdAt" DESC
+            `;
 
             // Transform data for frontend compatibility
-            // Frontend expects: { id, customerName, email, phone, checkIn, checkOut, roomType, bookingStatus, createdAt }
             const transformedBookings = bookings.map((b: any) => ({
                 id: b.id,
-                customerName: b.user?.name || 'Unknown',
-                email: b.user?.email || 'N/A',
-                phone: b.user?.phone || 'N/A',
+                customerName: b.user_name || 'Unknown',
+                email: b.user_email || 'N/A',
+                phone: b.user_phone || 'N/A',
                 checkIn: b.checkIn,
                 checkOut: b.checkOut,
-                roomType: b.room?.roomType || 'Unknown Room',
+                roomType: b.room_type || 'Unknown Room',
                 bookingTime: b.bookingTime || b.createdAt,
-                bookingStatus: b.status || 'pending', // Map 'status' to 'bookingStatus'
+                bookingStatus: b.status || 'pending',
                 createdAt: b.createdAt
             }));
 

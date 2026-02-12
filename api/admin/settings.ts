@@ -1,6 +1,6 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { insforge } from '../../lib/insforge';
+import { sql } from '../../lib/neon';
 import { verifyToken, handleAuthError } from '../_lib/auth.js';
 
 export default async function handler(
@@ -29,46 +29,28 @@ export default async function handler(
         }
     }
 
-    // Check InsForge client
-    if (!insforge) {
-        console.error('InsForge client not initialized');
-        return response.status(500).json({ error: 'Database configuration error' });
-    }
-
     try {
         if (request.method === 'GET') {
-            const { data, error } = await insforge.database
-                .from('settings')
-                .select('key, value');
+            const settings = await sql`SELECT key, value FROM settings`;
 
-            if (error) throw error;
-
-            // Transform array to object for easier consumption { key: value }
-            const settings = (data || []).reduce((acc: any, row: any) => {
+            // Transform array to object { key: value }
+            const result = (settings || []).reduce((acc: any, row: any) => {
                 acc[row.key] = row.value;
                 return acc;
             }, {});
 
-            return response.status(200).json(settings);
+            return response.status(200).json(result);
         }
 
         if (request.method === 'PUT') {
-            const settings = request.body; // Expect { key: value, key2: value2 }
+            const settingsBody = request.body; // Expect { key: value, key2: value2 }
 
-            // InsForge (PostgREST) supports bulk upsert
-            // Transform object to array of { key, value }
-            const updates = Object.keys(settings).map(key => ({
-                key,
-                value: settings[key],
-                updated_at: new Date().toISOString()
-            }));
-
-            if (updates.length > 0) {
-                const { error } = await insforge.database
-                    .from('settings')
-                    .upsert(updates, { onConflict: 'key' });
-
-                if (error) throw error;
+            const keys = Object.keys(settingsBody);
+            for (const key of keys) {
+                await sql`
+                    INSERT INTO settings (key, value, updated_at) VALUES (${key}, ${settingsBody[key]}, NOW())
+                    ON CONFLICT (key) DO UPDATE SET value = ${settingsBody[key]}, updated_at = NOW()
+                `;
             }
 
             return response.status(200).json({ message: 'Settings updated successfully' });

@@ -1,6 +1,6 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { insforge } from '../../../lib/insforge';
+import { sql } from '../../../lib/neon';
 import { verifyToken, handleAuthError } from '../../_lib/auth.js';
 
 export default async function handler(
@@ -33,12 +33,6 @@ export default async function handler(
         return response.status(400).json({ error: 'Invalid ID' });
     }
 
-    // Check InsForge client
-    if (!insforge) {
-        console.error('InsForge client not initialized');
-        return response.status(500).json({ error: 'Database configuration error' });
-    }
-
     try {
         if (request.method === 'PUT') {
             const { status } = request.body;
@@ -47,44 +41,28 @@ export default async function handler(
                 return response.status(400).json({ error: 'Status is required' });
             }
 
-            // Map status to uppercase if needed by DB enum
             const formattedStatus = status.toUpperCase();
 
-            const { data, error } = await insforge.database
-                .from('bookings')
-                .update({
-                    status: formattedStatus,
-                    updatedAt: new Date().toISOString()
-                })
-                .eq('id', id)
-                .select()
-                .single();
+            const result = await sql`
+                UPDATE bookings SET status = ${formattedStatus}, "updatedAt" = NOW()
+                WHERE id = ${id}
+                RETURNING *
+            `;
 
-            if (error) {
-                console.error('Update Booking Error:', error);
-                throw error;
-            }
-
-            if (!data) {
+            if (result.length === 0) {
                 return response.status(404).json({ error: 'Booking not found' });
             }
 
-            return response.status(200).json(data);
+            return response.status(200).json(result[0]);
         }
 
         if (request.method === 'DELETE') {
-            const { error, data } = await insforge.database
-                .from('bookings')
-                .delete()
-                .eq('id', id)
-                .select();
+            // First delete related room_availability records
+            await sql`DELETE FROM room_availability WHERE "bookingId" = ${id}`;
 
-            if (error) {
-                console.error('Delete Booking Error:', error);
-                throw error;
-            }
+            const result = await sql`DELETE FROM bookings WHERE id = ${id} RETURNING id`;
 
-            if (!data || data.length === 0) {
+            if (result.length === 0) {
                 return response.status(404).json({ error: 'Booking not found' });
             }
 

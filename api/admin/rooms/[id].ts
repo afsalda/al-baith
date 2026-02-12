@@ -1,6 +1,6 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { insforge } from '../../../lib/insforge';
+import { sql } from '../../../lib/neon';
 import { verifyToken, handleAuthError } from '../../_lib/auth.js';
 
 export default async function handler(
@@ -33,64 +33,49 @@ export default async function handler(
         return response.status(400).json({ error: 'Invalid ID' });
     }
 
-    // Check InsForge client
-    if (!insforge) {
-        console.error('InsForge client not initialized');
-        return response.status(500).json({ error: 'Database configuration error' });
-    }
-
     try {
         if (request.method === 'PUT') {
             const { room_type, price, description, image_url, capacity } = request.body;
 
-            // Build update object with only provided fields
-            const updates: any = {};
-            // Map incoming 'room_type' to 'roomType' column
-            if (room_type !== undefined) updates.roomType = room_type;
-            if (price !== undefined) updates.price = price;
-            if (description !== undefined) updates.description = description;
-            if (image_url !== undefined) updates.image_url = image_url;
-            if (capacity !== undefined) updates.capacity = capacity;
+            // Build dynamic SET clause
+            const updates: string[] = [];
+            const values: any[] = [];
 
-            updates.updatedAt = new Date().toISOString();
+            if (room_type !== undefined) { updates.push(`"roomType" = $${updates.length + 1}`); values.push(room_type); }
+            if (price !== undefined) { updates.push(`price = $${updates.length + 1}`); values.push(price); }
+            if (description !== undefined) { updates.push(`description = $${updates.length + 1}`); values.push(description); }
+            if (image_url !== undefined) { updates.push(`image_url = $${updates.length + 1}`); values.push(image_url); }
+            if (capacity !== undefined) { updates.push(`capacity = $${updates.length + 1}`); values.push(capacity); }
+            updates.push(`"updatedAt" = NOW()`);
 
-            const { data, error } = await insforge.database
-                .from('rooms')
-                .update(updates)
-                .eq('id', id)
-                .select()
-                .single();
-
-            if (error) {
-                console.error('Update Room Error:', error);
-                throw error;
+            if (values.length === 0) {
+                return response.status(400).json({ error: 'No fields to update' });
             }
 
-            if (!data) {
+            // Use tagged template with individual fields since dynamic SQL is tricky with neon
+            const result = await sql`
+                UPDATE rooms SET
+                    "roomType" = COALESCE(${room_type ?? null}, "roomType"),
+                    price = COALESCE(${price ?? null}, price),
+                    description = COALESCE(${description ?? null}, description),
+                    image_url = COALESCE(${image_url ?? null}, image_url),
+                    capacity = COALESCE(${capacity ?? null}, capacity),
+                    "updatedAt" = NOW()
+                WHERE id = ${id}
+                RETURNING *
+            `;
+
+            if (result.length === 0) {
                 return response.status(404).json({ error: 'Room not found' });
             }
 
-            return response.status(200).json(data);
+            return response.status(200).json(result[0]);
         }
 
         if (request.method === 'DELETE') {
-            const { error, data } = await insforge.database
-                .from('rooms')
-                .delete()
-                .eq('id', id)
-                .select(); // Select to check if deleted
+            const result = await sql`DELETE FROM rooms WHERE id = ${id} RETURNING id`;
 
-            if (error) {
-                // Check for foreign key violation (usually error code 23503 in postgres)
-                if (error.code === '23503') {
-                    return response.status(400).json({ error: 'Cannot delete room with existing bookings' });
-                }
-                console.error('Delete Room Error:', error);
-                throw error;
-            }
-
-            // Check if any row was returned (meaning deleted)
-            if (!data || data.length === 0) {
+            if (result.length === 0) {
                 return response.status(404).json({ error: 'Room not found (or already deleted)' });
             }
 
@@ -101,6 +86,10 @@ export default async function handler(
 
     } catch (error: any) {
         console.error('Room Details API Error:', error);
+        // Check for foreign key violation
+        if (error.code === '23503') {
+            return response.status(400).json({ error: 'Cannot delete room with existing bookings' });
+        }
         return response.status(500).json({ error: 'Internal server error', details: error.message });
     }
 }

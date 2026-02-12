@@ -1,9 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createRequire } from 'module';
-import { insforge } from '../../lib/insforge';
+import { sql } from '../../lib/neon';
 import jwt from 'jsonwebtoken';
 
-// Secret key for JWT - in production this should be in .env
 const JWT_SECRET = process.env.JWT_SECRET || 'al-baith-admin-secret-key-123';
 
 export default async function handler(
@@ -33,32 +31,18 @@ export default async function handler(
     if (email) email = email.trim();
     if (password) password = password.trim();
 
-    console.log('[Login API] Received login attempt:', { email, passwordProvided: !!password }); // Log attempt
+    console.log('[Login API] Received login attempt:', { email, passwordProvided: !!password });
 
     if (!email || !password) {
         return response.status(400).json({ error: 'Email and password are required' });
     }
 
-    // Check InsForge client
-    if (!insforge) {
-        console.error('InsForge client not initialized');
-        return response.status(500).json({ error: 'Database configuration error' });
-    }
-
     try {
-        const { data: admins, error } = await insforge.database
-            .from('admins')
-            .select('*')
-            .eq('email', email);
+        const admins = await sql`SELECT * FROM admins WHERE email = ${email}`;
 
-        if (error) {
-            console.error('InsForge query error:', error);
-            throw error;
-        }
+        console.log('[Login API] DB Query result count:', admins.length);
 
-        console.log('[Login API] DB Query result count:', admins?.length || 0);
-
-        if (!admins || admins.length === 0) {
+        if (admins.length === 0) {
             console.log('[Login API] User not found for email:', email);
             return response.status(401).json({ error: 'Invalid credentials (user not found)' });
         }
@@ -66,13 +50,10 @@ export default async function handler(
         const admin = admins[0];
         console.log('[Login API] User found, checking password...');
 
-        // Simple password check (Equality)
-        // Note: In production, use hashed passwords!
         if (admin.password_hash !== password) {
             console.log('[Login API] Password mismatch');
-            // Check if there is a trimmed mismatch
             if (admin.password_hash.trim() === password.trim()) {
-                console.log('[Login API] Password match if trimmed! Potential whitespace issue in DB or request.');
+                console.log('[Login API] Password match if trimmed!');
             }
             return response.status(401).json({ error: 'Invalid credentials (password mismatch)' });
         }

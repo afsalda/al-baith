@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@insforge/sdk": "^1.1.5",
+    "@neondatabase/serverless": "^1.0.2",
     "@radix-ui/react-separator": "^1.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "@types/jsonwebtoken": "^9.0.10",
