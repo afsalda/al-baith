@@ -146,7 +146,7 @@ const Rooms: React.FC<RoomsProps> = ({
                 <div className="mb-12 text-center">
                     <SplitReveal
                         text={heading}
-                        className="mb-4 text-3xl font-bold tracking-tight md:text-5xl"
+                        className="mb-4 text-3xl font-bold tracking-tight md:text-5xl font-['Cinzel_Decorative']"
                         scrollTrigger
                         duration={0.9}
                         stagger={0.04}
